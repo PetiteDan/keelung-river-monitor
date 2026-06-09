@@ -1,38 +1,42 @@
-// 從 RealTimeInfo 取得所有即時資料站號，再交叉比對 Station API 補基本資料
-// 篩選範圍：1140H5xx 系列（基隆河）+ 已知的 1140H110（員山子段）
+// 已知基隆河所有水位站（hardcoded 站名 + 從 API 補警戒值）
+const KNOWN_STATIONS = [
+  { StationNo: '1140H501', StationName: '大宜橋',   region: '基隆七堵' },
+  { StationNo: '1140H502', StationName: '長安橋',   region: '新北汐止' },
+  { StationNo: '1140H503', StationName: '大華橋',   region: '基隆七堵' },
+  { StationNo: '1140H504', StationName: '社后橋',   region: '新北汐止' },
+  { StationNo: '1140H505', StationName: '南湖大橋', region: '台北南港' },
+  { StationNo: '1140H506', StationName: '百齡橋',   region: '台北中山' },
+  { StationNo: '1140H507', StationName: '江北橋',   region: '新北汐止' },
+  { StationNo: '1140H508', StationName: '暖江橋',   region: '基隆暖暖' },
+  { StationNo: '1140H509', StationName: '碇內',     region: '基隆暖暖' },
+  { StationNo: '1140H110', StationName: '介壽橋',   region: '新北瑞芳' },
+];
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
-    const [rtRes, stRes] = await Promise.all([
-      fetch('https://fhy.wra.gov.tw/WraApi/v1/Water/RealTimeInfo'),
-      fetch('https://fhy.wra.gov.tw/WraApi/v1/Water/Station')
-    ]);
-    const rtAll  = await rtRes.json();
-    const stAll  = await stRes.json();
+    // 嘗試從 Station API 補警戒值，失敗也沒關係
+    let stMap = {};
+    try {
+      const stRes = await fetch('https://fhy.wra.gov.tw/WraApi/v1/Water/Station');
+      const stAll = await stRes.json();
+      stAll.forEach(s => { stMap[s.StationNo] = s; });
+    } catch (_) {}
 
-    // Station API → 以 StationNo 建立查詢 map
-    const stMap = {};
-    stAll.forEach(s => { stMap[s.StationNo] = s; });
-
-    // 篩選基隆河站號
-    const PREFIXES  = ['1140H5'];
-    const EXTRA_IDS = ['1140H110'];
-
-    const keelungRt = rtAll.filter(r =>
-      r.StationNo &&
-      (PREFIXES.some(p => r.StationNo.startsWith(p)) || EXTRA_IDS.includes(r.StationNo))
-    );
-
-    // 合併：有 Station 資料就用，沒有就用 StationNo 當名稱
-    const result = keelungRt.map(r => {
-      const s = stMap[r.StationNo];
-      return s
-        ? s
-        : { StationNo: r.StationNo, StationName: r.StationNo, BasinName: '基隆河' };
+    const result = KNOWN_STATIONS.map(k => {
+      const api = stMap[k.StationNo] || {};
+      return {
+        StationNo: k.StationNo,
+        StationName: api.StationName || k.StationName,
+        Address: api.Address || k.region,
+        WarningLevel1: api.WarningLevel1 ?? null,
+        WarningLevel2: api.WarningLevel2 ?? null,
+        WarningLevel3: api.WarningLevel3 ?? null,
+        TopLevel: api.TopLevel ?? null,
+        PlanFloodLevel: api.PlanFloodLevel ?? null,
+      };
     });
 
-    // 依站號排序
-    result.sort((a, b) => a.StationNo.localeCompare(b.StationNo));
     res.status(200).json(result);
   } catch (e) {
     res.status(500).json({ error: e.message });

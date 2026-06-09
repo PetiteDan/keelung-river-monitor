@@ -58,7 +58,15 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
 /* ── Sidebar ── */
 .sidebar {
   width: 190px; min-width: 190px; background: var(--surface);
-  border-right: 0.5px solid var(--border); display: flex; flex-direction: column; overflow-y: auto;
+  border-right: 0.5px solid var(--border);
+  display: flex; flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+#stationList {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 .sb-section { padding: 10px 14px 5px; font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; }
 .station-btn {
@@ -77,8 +85,8 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
 .dot-yellow { background: var(--yellow); }
 .dot-red    { background: var(--red); }
 .dot-gray   { background: var(--gray); }
-.sb-controls { padding: 10px 12px; border-top: 0.5px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
-.sb-footer { padding: 10px 14px; font-size: 12px; color: var(--text3); line-height: 1.6; border-top: 0.5px solid var(--border); }
+.sb-controls { padding: 10px 12px; border-top: 0.5px solid var(--border); display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.sb-footer { padding: 10px 14px; font-size: 12px; color: var(--text3); line-height: 1.6; border-top: 0.5px solid var(--border); flex-shrink: 0; }
 
 /* ── Main ── */
 .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -604,22 +612,9 @@ async function saveStations() {
     const d = await res.json();
     if (res.ok) {
       closeModal('adminModal');
-      // 從快取重建 stations 陣列，保留 meta/rt；僅清 hist 讓歷史圖重新抓
-      stations = pendingIds.map(id => {
-        const m = allStationsMeta[id] || meta[id];
-        return {
-          id,
-          name: m?.StationName || id,
-          region: m?.Address ? m.Address.slice(0, 5) : (meta[id] ? '' : '')
-        };
-      });
-      hist = {};
-      rt = {};
-      // 同步更新 meta（補上新站點資料）
-      pendingIds.forEach(id => {
-        if (allStationsMeta[id] && !meta[id]) meta[id] = allStationsMeta[id];
-      });
-      if (sel >= stations.length) sel = 0;
+      // 清空所有快取，讓 loadData() 完全重新從 API 抓取（包含 Edge Config 最新清單）
+      stations = []; meta = {}; rt = {}; hist = {};
+      if (sel >= pendingIds.length) sel = 0;
       await loadData();
     } else {
       document.getElementById('adminErr').textContent = d.error || '儲存失敗';

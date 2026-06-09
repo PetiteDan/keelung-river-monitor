@@ -243,6 +243,7 @@ header h1 { font-size: 15px; font-weight: 500; flex: 1; }
 // ── State ──
 let stations = [];   // { id, name, region }  啟用中
 let meta = {};       // StationNo → Station API 資料
+let allStationsMeta = {}; // 全部可用站點快取（管理介面用）
 let rt = {};         // StationNo → RealTime 資料
 let hist = {};       // StationNo → [{date, value}]
 let sel = 0;
@@ -516,6 +517,8 @@ async function openAdminModal() {
   try {
     const res = await fetch('/api/all-stations');
     const all = await res.json();
+    // 快取全部站點 meta（含名稱），供 renderAdminList 顯示正確站名
+    all.forEach(s => { allStationsMeta[s.StationNo] = s; });
     const select = document.getElementById('addStationSelect');
     select.innerHTML = '<option value="">— 選擇要新增的站點 —</option>';
     all.sort((a,b)=>(a.StationName||'').localeCompare(b.StationName||'')).forEach(s => {
@@ -527,17 +530,18 @@ async function openAdminModal() {
         select.appendChild(opt);
       }
     });
+    // 取得快取後重新渲染清單，讓新加入的站點顯示正確名稱
+    renderAdminList();
   } catch(e) {
     document.getElementById('addStationSelect').innerHTML = '<option value="">無法載入站點列表</option>';
   }
 }
 
 function renderAdminList() {
-  const allMeta = meta;
   document.getElementById('adminStationList').innerHTML = pendingIds.length === 0
     ? '<div class="sla-row" style="color:var(--text3)">尚無站點</div>'
     : pendingIds.map(id => {
-        const m = allMeta[id];
+        const m = allStationsMeta[id] || meta[id];
         const name = m?.StationName || id;
         return `<div class="sla-row">
           <span class="sname">${name}</span>
@@ -552,7 +556,7 @@ function removeStation(id) {
   pendingIds = pendingIds.filter(i => i !== id);
   // Refresh select: add back the removed station
   const select = document.getElementById('addStationSelect');
-  const m = meta[id];
+  const m = allStationsMeta[id] || meta[id];
   if (m) {
     const opt = document.createElement('option');
     opt.value = id;
@@ -591,8 +595,22 @@ async function saveStations() {
     const d = await res.json();
     if (res.ok) {
       closeModal('adminModal');
-      // Reset & reload
-      stations = [];  meta = {};  rt = {};  hist = {};
+      // 從快取重建 stations 陣列，保留 meta/rt；僅清 hist 讓歷史圖重新抓
+      stations = pendingIds.map(id => {
+        const m = allStationsMeta[id] || meta[id];
+        return {
+          id,
+          name: m?.StationName || id,
+          region: m?.Address ? m.Address.slice(0, 5) : (meta[id] ? '' : '')
+        };
+      });
+      hist = {};
+      rt = {};
+      // 同步更新 meta（補上新站點資料）
+      pendingIds.forEach(id => {
+        if (allStationsMeta[id] && !meta[id]) meta[id] = allStationsMeta[id];
+      });
+      if (sel >= stations.length) sel = 0;
       await loadData();
     } else {
       document.getElementById('adminErr').textContent = d.error || '儲存失敗';

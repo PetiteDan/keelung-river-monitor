@@ -4,7 +4,7 @@ const DEFAULT_IDS = ['1140H507', '1140H504', '1140H502'];
 
 // 所有已知站的基本資料（Station API 找不到時的 fallback）
 const STATION_FALLBACK = {
-  '1140H118': { StationNo:'1140H118', StationName:'員山子', Address:'新北市瑞芳區', BasinName:'基隆河' },
+  '1140H989': { StationNo:'1140H989', StationName:'員山子', Address:'新北市瑞芳區', BasinName:'基隆河' },
   '1140H501': { StationNo:'1140H501', StationName:'大宜橋', Address:'基隆市七堵區', BasinName:'基隆河' },
   '1140H502': { StationNo:'1140H502', StationName:'長安橋', Address:'新北市汐止區', BasinName:'基隆河' },
   '1140H503': { StationNo:'1140H503', StationName:'大華橋', Address:'基隆市七堵區', BasinName:'基隆河' },

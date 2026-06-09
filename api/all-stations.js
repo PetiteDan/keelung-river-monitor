@@ -4,7 +4,7 @@ const TAMSUI_STATIONS = [
   { StationNo:'1140H509', StationName:'碇內',       river:'基隆河', region:'基隆暖暖' },
   { StationNo:'1140H508', StationName:'暖江橋',     river:'基隆河', region:'基隆暖暖' },
   { StationNo:'1140H110', StationName:'介壽橋',     river:'基隆河', region:'新北瑞芳' },
-  { StationNo:'1140H118', StationName:'員山子',     river:'基隆河', region:'新北瑞芳' },
+  { StationNo:'1140H989', StationName:'員山子', river:'基隆河', region:'新北瑞芳' },
   { StationNo:'1140H501', StationName:'大宜橋',     river:'基隆河', region:'基隆七堵' },
   { StationNo:'1140H503', StationName:'大華橋',     river:'基隆河', region:'基隆七堵' },
   { StationNo:'1140H507', StationName:'江北橋',     river:'基隆河', region:'新北汐止' },
@@ -31,7 +31,6 @@ const TAMSUI_STATIONS = [
   { StationNo:'1140H130', StationName:'柑城橋',     river:'大漢溪', region:'新北' },
   { StationNo:'1140H054', StationName:'三峽橋',     river:'大漢溪', region:'新北' },
   { StationNo:'1140H058', StationName:'新海橋',     river:'大漢溪', region:'新北' },
-  { StationNo:'1140H989', StationName:'上龜山橋',   river:'大漢溪', region:'桃園' },
   // 景美溪
   { StationNo:'1140H119', StationName:'深坑中正橋', river:'景美溪', region:'新北' },
   { StationNo:'1140H082', StationName:'寶橋',       river:'景美溪', region:'台北' },

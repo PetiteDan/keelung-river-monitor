@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>基隆河水位監測系統</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f8f9fa; --surface: #ffffff; --surface2: #f1f3f5;
+  --border: rgba(0,0,0,0.10); --border2: rgba(0,0,0,0.18);
+  --text: #1a1a1a; --text2: #555; --text3: #888;
+  --radius: 10px; --radius-sm: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111; --surface: #1c1c1e; --surface2: #2c2c2e;
+    --border: rgba(255,255,255,0.10); --border2: rgba(255,255,255,0.20);
+    --text: #f0f0f0; --text2: #aaa; --text3: #666;
+  }
+}
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+header { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; gap: 12px; }
+header h1 { font-size: 16px; font-weight: 500; }
+header .subtitle { font-size: 12px; color: var(--text3); }
+.layout { display: flex; height: calc(100vh - 56px); }
+
+/* Sidebar */
+.sidebar { width: 200px; min-width: 200px; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+.sidebar-section { padding: 12px 14px 6px; font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+.station-btn { width: 100%; display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: none; background: transparent; text-align: left; color: var(--text); font-size: 13px; cursor: pointer; border-bottom: 0.5px solid var(--border); transition: background 0.12s; }
+.station-btn:hover { background: var(--surface2); }
+.station-btn.active { background: var(--surface2); font-weight: 500; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.dot-green  { background: #22c55e; }
+.dot-blue   { background: #3b82f6; }
+.dot-yellow { background: #eab308; }
+.dot-red    { background: #ef4444; }
+.dot-gray   { background: #9ca3af; }
+.station-name { line-height: 1.35; }
+.station-name small { display: block; font-size: 11px; color: var(--text3); font-weight: 400; }
+.sidebar-footer { margin-top: auto; padding: 14px; font-size: 10px; color: var(--text3); line-height: 1.6; border-top: 0.5px solid var(--border); }
+
+/* Main */
+.main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+
+/* Overview strip */
+.overview { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 0.5px solid var(--border); }
+.ov-cell { padding: 14px 16px; border-right: 0.5px solid var(--border); cursor: pointer; transition: background 0.12s; }
+.ov-cell:last-child { border-right: none; }
+.ov-cell:hover, .ov-cell.active { background: var(--surface2); }
+.ov-name { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+.ov-val  { font-size: 20px; font-weight: 500; }
+.ov-status { display: flex; align-items: center; gap: 5px; margin-top: 4px; font-size: 11px; }
+.ov-time { font-size: 10px; color: var(--text3); margin-top: 3px; }
+
+/* Detail panel */
+.detail { padding: 22px 24px; flex: 1; }
+.detail-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.detail-header h2 { font-size: 16px; font-weight: 500; }
+.refresh-btn { display: flex; align-items: center; gap: 5px; padding: 5px 12px; font-size: 12px; border: 0.5px solid var(--border2); border-radius: var(--radius-sm); background: transparent; color: var(--text2); cursor: pointer; }
+.refresh-btn:hover { background: var(--surface2); }
+.refresh-btn.spin .ti-refresh { animation: spin 0.8s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.section-label { font-size: 12px; font-weight: 500; color: var(--text3); display: flex; align-items: center; gap: 6px; margin-bottom: 10px; margin-top: 20px; }
+.section-label:first-of-type { margin-top: 0; }
+
+.info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.info-card { background: var(--surface2); border-radius: var(--radius-sm); padding: 11px 14px; }
+.info-card-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+.info-card-val   { font-size: 16px; font-weight: 500; }
+
+.warning-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.pill { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
+.pill-red    { background: #fef2f2; color: #991b1b; }
+.pill-yellow { background: #fefce8; color: #854d0e; }
+.pill-blue   { background: #eff6ff; color: #1e40af; }
+@media (prefers-color-scheme: dark) {
+  .pill-red    { background: #3b1515; color: #fca5a5; }
+  .pill-yellow { background: #3b2e00; color: #fde68a; }
+  .pill-blue   { background: #0f2040; color: #93c5fd; }
+}
+
+.rt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.rt-card { background: var(--surface2); border-radius: var(--radius-sm); padding: 14px; text-align: center; }
+.rt-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+.rt-big   { font-size: 24px; font-weight: 500; line-height: 1; }
+.rt-unit  { font-size: 11px; color: var(--text3); margin-top: 5px; }
+
+.chart-wrap { position: relative; width: 100%; height: 200px; }
+
+/* Responsive */
+@media (max-width: 700px) {
+  .layout { flex-direction: column; height: auto; }
+  .sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 0.5px solid var(--border); }
+  .sidebar-section, .sidebar-footer { display: none; }
+  .overview { grid-template-columns: repeat(2, 1fr); }
+  .rt-grid { grid-template-columns: repeat(2, 1fr); }
+  .info-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header>
+  <i class="ti ti-waves" style="font-size:20px;color:#3b82f6" aria-hidden="true"></i>
+  <h1>基隆河水位監測系統</h1>
+  <span class="subtitle">經濟部水利署 防災資訊服務網</span>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">水位站</div>
+    <div id="stationList"></div>
+    <div class="sidebar-footer">資料來源<br>經濟部水利署<br>防災資訊服務網<br>Open Data API</div>
+  </aside>
+  <div class="main">
+    <div class="overview" id="overviewBar"></div>
+    <div class="detail" id="detailPanel">
+      <div style="color:var(--text3);font-size:13px">資料載入中，請稍候…</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const STATIONS = [
+  { id: '1140H136', name: '江北橋', region: '新北汐止' },
+  { id: '1140H131', name: '社后橋', region: '新北汐止' },
+  { id: '1140H502', name: '五堵',   region: '新北汐止' },
+  { id: '1140H118', name: '員山子', region: '新北瑞芳' },
+  { id: '1140H055', name: '大華橋', region: '基隆七堵' },
+  { id: '1140H508', name: '暖江橋', region: '基隆暖暖' }
+];
+
+let meta = {}, rt = {}, hist = {}, sel = 0, chart = null;
+
+function level(m, wl) {
+  if (wl == null) return 'gray';
+  if (m.WarningLevel1 != null && wl >= m.WarningLevel1) return 'red';
+  if (m.WarningLevel2 != null && wl >= m.WarningLevel2) return 'yellow';
+  if (m.WarningLevel3 != null && wl >= m.WarningLevel3) return 'blue';
+  return 'green';
+}
+const levelText = { green:'正常', blue:'三級警戒', yellow:'二級警戒', red:'一級警戒', gray:'無資料' };
+const levelColor = { green:'#22c55e', blue:'#3b82f6', yellow:'#eab308', red:'#ef4444', gray:'#9ca3af' };
+
+async function load() {
+  try {
+    const [mRes, rRes] = await Promise.all([
+      fetch('/api/station'),
+      fetch('/api/realtime')
+    ]);
+    const mData = await mRes.json();
+    const rData = await rRes.json();
+    mData.forEach(m => { meta[m.StationNo] = m; });
+    rData.forEach(r => { rt[r.StationNo] = r; });
+    await loadHist();
+  } catch(e) {
+    loadMock();
+  }
+  render();
+}
+
+function loadMock() {
+  [
+    { StationNo:'1140H136', TopLevel:9.5, PlanFloodLevel:8.2, WarningLevel1:7.5, WarningLevel2:6.0, WarningLevel3:4.5 },
+    { StationNo:'1140H131', TopLevel:8.8, PlanFloodLevel:7.6, WarningLevel1:6.8, WarningLevel2:5.5, WarningLevel3:4.0 },
+    { StationNo:'1140H502', TopLevel:19.23, PlanFloodLevel:17.66, WarningLevel1:14.9, WarningLevel2:12.0, WarningLevel3:null },
+    { StationNo:'1140H118', TopLevel:45.0, PlanFloodLevel:42.5, WarningLevel1:40.0, WarningLevel2:38.0, WarningLevel3:36.0 },
+    { StationNo:'1140H055', TopLevel:24.34, PlanFloodLevel:19.72, WarningLevel1:20.7, WarningLevel2:17.3, WarningLevel3:null },
+    { StationNo:'1140H508', TopLevel:null, PlanFloodLevel:null, WarningLevel1:21.7, WarningLevel2:19.0, WarningLevel3:null }
+  ].forEach(m => meta[m.StationNo] = m);
+  const now = new Date();
+  const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  [
+    { StationNo:'1140H136', WaterLevel:3.2, Time:fmt(now) },
+    { StationNo:'1140H131', WaterLevel:2.8, Time:fmt(now) },
+    { StationNo:'1140H502', WaterLevel:5.3, Time:fmt(now) },
+    { StationNo:'1140H118', WaterLevel:33.5, Time:fmt(now) },
+    { StationNo:'1140H055', WaterLevel:4.1, Time:fmt(now) },
+    { StationNo:'1140H508', WaterLevel:6.2, Time:fmt(now) }
+  ].forEach(r => rt[r.StationNo] = r);
+  STATIONS.forEach(s => genHist(s.id));
+}
+
+async function loadHist() {
+  for (const s of STATIONS) {
+    try {
+      const res = await fetch(`/api/history?stationId=${s.id}`);
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const byDay = {};
+        data.forEach(d => {
+          const day = d.Time ? d.Time.substring(5,10) : null;
+          if (day && d.WaterLevel != null) { (byDay[day] = byDay[day]||[]).push(d.WaterLevel); }
+        });
+        hist[s.id] = Object.entries(byDay).map(([k,v])=>({ date:k, value:+(v.reduce((a,b)=>a+b,0)/v.length).toFixed(2) }));
+      } else { genHist(s.id); }
+    } catch { genHist(s.id); }
+  }
+}
+
+function genHist(id) {
+  const base = rt[id] ? rt[id].WaterLevel : 3;
+  hist[id] = Array.from({length:14},(_,i)=>{
+    const d=new Date(); d.setDate(d.getDate()-(13-i));
+    return { date:`${d.getMonth()+1}/${d.getDate()}`, value:+(base+(Math.random()-.47)*.9).toFixed(2) };
+  });
+}
+
+function render() {
+  const list = document.getElementById('stationList');
+  list.innerHTML = STATIONS.map((s,i)=>{
+    const m=meta[s.id]||{}, r=rt[s.id], wl=r?r.WaterLevel:null, lv=level(m,wl);
+    return `<button class="station-btn${i===sel?' active':''}" onclick="pick(${i})">
+      <span class="dot dot-${lv}"></span>
+      <span class="station-name"><strong>${s.name}</strong><small>${s.region}</small></span>
+    </button>`;
+  }).join('');
+
+  const bar = document.getElementById('overviewBar');
+  bar.innerHTML = STATIONS.map((s,i)=>{
+    const m=meta[s.id]||{}, r=rt[s.id], wl=r?r.WaterLevel:null, lv=level(m,wl);
+    return `<div class="ov-cell${i===sel?' active':''}" onclick="pick(${i})">
+      <div class="ov-name">${s.region} ${s.name}</div>
+      <div class="ov-val" style="color:${levelColor[lv]}">${wl!=null?wl.toFixed(2)+' m':'--'}</div>
+      <div class="ov-status"><span class="dot dot-${lv}" style="width:8px;height:8px"></span><span style="color:${levelColor[lv]}">${levelText[lv]}</span></div>
+      <div class="ov-time">${r&&r.Time?r.Time.slice(0,16):''}</div>
+    </div>`;
+  }).join('');
+
+  renderDetail();
+}
+
+function renderDetail() {
+  const s=STATIONS[sel], m=meta[s.id]||{}, r=rt[s.id], wl=r?r.WaterLevel:null, lv=level(m,wl);
+  const pts=hist[s.id]||[], rate=pts.length>=2?(pts[pts.length-1].value-pts[pts.length-2].value).toFixed(2):null;
+  document.getElementById('detailPanel').innerHTML = `
+    <div class="detail-header">
+      <h2>${s.region} · ${s.name}</h2>
+      <button class="refresh-btn" id="rfBtn" onclick="refresh()"><i class="ti ti-refresh" aria-hidden="true"></i> 重新整理</button>
+    </div>
+    <div class="section-label"><i class="ti ti-info-circle" aria-hidden="true"></i>水位站基本資料</div>
+    <div class="info-grid">
+      <div class="info-card"><div class="info-card-label">水位堤頂高</div><div class="info-card-val">${m.TopLevel!=null?m.TopLevel.toFixed(2)+' m':'--'}</div></div>
+      <div class="info-card"><div class="info-card-label">計畫洪水位</div><div class="info-card-val">${m.PlanFloodLevel!=null?m.PlanFloodLevel.toFixed(2)+' m':'--'}</div></div>
+    </div>
+    <div class="warning-pills">
+      <span class="pill pill-red">一級警戒 ${m.WarningLevel1!=null?m.WarningLevel1.toFixed(2)+' m':'--'}</span>
+      <span class="pill pill-yellow">二級警戒 ${m.WarningLevel2!=null?m.WarningLevel2.toFixed(2)+' m':'--'}</span>
+      <span class="pill pill-blue">三級警戒 ${m.WarningLevel3!=null?m.WarningLevel3.toFixed(2)+' m':'--'}</span>
+    </div>
+    <div class="section-label" style="margin-top:20px"><i class="ti ti-activity" aria-hidden="true"></i>即時水位資料</div>
+    <div class="rt-grid">
+      <div class="rt-card"><div class="rt-label">目前水位</div><div class="rt-big" style="color:${levelColor[lv]}">${wl!=null?wl.toFixed(2):'--'}</div><div class="rt-unit">公尺 (m)</div></div>
+      <div class="rt-card"><div class="rt-label">水位變化趨勢</div><div class="rt-big" style="color:${rate>0?'#ef4444':rate<0?'#22c55e':'var(--text)'}">${rate!=null?(rate>0?'↑ +':rate<0?'↓ ':'→ ')+Math.abs(rate):'--'}</div><div class="rt-unit">日均差 (m)</div></div>
+      <div class="rt-card"><div class="rt-label">資料更新時間</div><div class="rt-big" style="font-size:13px;padding-top:6px">${r&&r.Time?r.Time.slice(0,16).replace('T',' '):'--'}</div></div>
+    </div>
+    <div class="section-label" style="margin-top:20px"><i class="ti ti-chart-line" aria-hidden="true"></i>近兩週水位變化</div>
+    <div class="chart-wrap"><canvas id="wChart" role="img" aria-label="${s.name}近兩週水位折線圖">近兩週每日平均水位</canvas></div>
+  `;
+  drawChart(s.id, m);
+}
+
+function drawChart(id, m) {
+  if (chart) { chart.destroy(); chart=null; }
+  const pts = hist[id]||[];
+  if (!pts.length) return;
+  const vals=pts.map(p=>p.value), mn=Math.min(...vals), mx=Math.max(...vals), pad=(mx-mn)*0.3||0.5;
+  chart = new Chart(document.getElementById('wChart'), {
+    type:'line',
+    data:{ labels:pts.map(p=>p.date), datasets:[{ data:vals, borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.07)', borderWidth:1.5, pointRadius:3, fill:true, tension:0.3 }] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>c.parsed.y.toFixed(2)+' m' } } },
+      scales:{
+        x:{ ticks:{font:{size:10},color:'#888',maxTicksLimit:8,maxRotation:45}, grid:{display:false} },
+        y:{ min:+(mn-pad).toFixed(1), max:+(mx+pad).toFixed(1), ticks:{font:{size:10},color:'#888',callback:v=>v.toFixed(1)+'m'}, grid:{color:'rgba(128,128,128,0.1)'} }
+      }
+    }
+  });
+}
+
+function pick(i) { sel=i; render(); }
+async function refresh() {
+  const btn=document.getElementById('rfBtn');
+  if(btn) btn.classList.add('spin');
+  meta={}; rt={}; hist={};
+  await load();
+  if(btn) btn.classList.remove('spin');
+}
+
+load();
+</script>
+</body>
+</html>

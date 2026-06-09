@@ -3,260 +3,456 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>基隆河水位監測系統</title>
+<title>基隆河汐止段水位監測系統</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #f8f9fa; --surface: #ffffff; --surface2: #f1f3f5;
-  --border: rgba(0,0,0,0.10); --border2: rgba(0,0,0,0.18);
-  --text: #1a1a1a; --text2: #555; --text3: #888;
-  --radius: 10px; --radius-sm: 6px;
+  --bg: #f4f5f7; --surface: #ffffff; --surface2: #f0f1f3;
+  --border: rgba(0,0,0,0.09); --border2: rgba(0,0,0,0.16);
+  --text: #1a1a1a; --text2: #555; --text3: #999;
+  --accent: #3b82f6;
+  --r: 8px; --r-sm: 5px;
+  --green: #22c55e; --blue: #3b82f6; --yellow: #eab308; --red: #ef4444; --gray: #9ca3af;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #111; --surface: #1c1c1e; --surface2: #2c2c2e;
-    --border: rgba(255,255,255,0.10); --border2: rgba(255,255,255,0.20);
-    --text: #f0f0f0; --text2: #aaa; --text3: #666;
+    --bg: #0f0f11; --surface: #1c1c1e; --surface2: #28282c;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.18);
+    --text: #efefef; --text2: #aaa; --text3: #666;
   }
 }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-header { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; gap: 12px; }
-header h1 { font-size: 16px; font-weight: 500; }
-header .subtitle { font-size: 12px; color: var(--text3); }
-.layout { display: flex; height: calc(100vh - 56px); }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-/* Sidebar */
-.sidebar { width: 200px; min-width: 200px; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
-.sidebar-section { padding: 12px 14px 6px; font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
-.station-btn { width: 100%; display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: none; background: transparent; text-align: left; color: var(--text); font-size: 13px; cursor: pointer; border-bottom: 0.5px solid var(--border); transition: background 0.12s; }
+/* ── Header ── */
+header {
+  background: var(--surface); border-bottom: 0.5px solid var(--border);
+  padding: 0 20px; height: 52px; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+header h1 { font-size: 15px; font-weight: 500; flex: 1; }
+.auto-toggle {
+  display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text2);
+  background: var(--surface2); border: 0.5px solid var(--border2);
+  border-radius: var(--r-sm); padding: 5px 10px; cursor: pointer; user-select: none;
+}
+.auto-toggle .dot-pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+.auto-toggle.off .dot-pulse { background: var(--gray); }
+.auto-toggle.off .lbl-on { display: none; }
+.auto-toggle.off .lbl-off { display: inline; }
+.auto-toggle .lbl-off { display: none; }
+.countdown { font-size: 11px; color: var(--text3); min-width: 28px; text-align: right; }
+.admin-btn {
+  display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text2);
+  background: transparent; border: 0.5px solid var(--border2);
+  border-radius: var(--r-sm); padding: 5px 10px; cursor: pointer;
+}
+.admin-btn:hover { background: var(--surface2); }
+
+/* ── Layout ── */
+.layout { display: flex; flex: 1; overflow: hidden; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 190px; min-width: 190px; background: var(--surface);
+  border-right: 0.5px solid var(--border); display: flex; flex-direction: column; overflow-y: auto;
+}
+.sb-section { padding: 10px 14px 5px; font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; }
+.station-btn {
+  width: 100%; display: flex; align-items: center; gap: 9px;
+  padding: 10px 14px; border: none; background: transparent; text-align: left;
+  color: var(--text); font-size: 13px; cursor: pointer;
+  border-bottom: 0.5px solid var(--border); transition: background 0.1s;
+}
 .station-btn:hover { background: var(--surface2); }
-.station-btn.active { background: var(--surface2); font-weight: 500; }
-.dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.dot-green  { background: #22c55e; }
-.dot-blue   { background: #3b82f6; }
-.dot-yellow { background: #eab308; }
-.dot-red    { background: #ef4444; }
-.dot-gray   { background: #9ca3af; }
-.station-name { line-height: 1.35; }
-.station-name small { display: block; font-size: 11px; color: var(--text3); font-weight: 400; }
-.sidebar-footer { margin-top: auto; padding: 14px; font-size: 10px; color: var(--text3); line-height: 1.6; border-top: 0.5px solid var(--border); }
+.station-btn.active { background: var(--surface2); }
+.station-btn .sname { line-height: 1.35; flex: 1; }
+.station-btn .sname small { display: block; font-size: 10px; color: var(--text3); font-weight: 400; }
+.dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.dot-green  { background: var(--green); }
+.dot-blue   { background: var(--blue); }
+.dot-yellow { background: var(--yellow); }
+.dot-red    { background: var(--red); }
+.dot-gray   { background: var(--gray); }
+.sb-footer { margin-top: auto; padding: 12px 14px; font-size: 10px; color: var(--text3); line-height: 1.6; border-top: 0.5px solid var(--border); }
 
-/* Main */
-.main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+/* ── Main ── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-/* Overview strip */
-.overview { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 0.5px solid var(--border); }
-.ov-cell { padding: 14px 16px; border-right: 0.5px solid var(--border); cursor: pointer; transition: background 0.12s; }
+/* Overview bar */
+.overview { display: flex; border-bottom: 0.5px solid var(--border); flex-shrink: 0; }
+.ov-cell {
+  flex: 1; padding: 12px 16px; border-right: 0.5px solid var(--border);
+  cursor: pointer; transition: background 0.1s;
+}
 .ov-cell:last-child { border-right: none; }
 .ov-cell:hover, .ov-cell.active { background: var(--surface2); }
-.ov-name { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
-.ov-val  { font-size: 20px; font-weight: 500; }
-.ov-status { display: flex; align-items: center; gap: 5px; margin-top: 4px; font-size: 11px; }
+.ov-name { font-size: 11px; color: var(--text3); margin-bottom: 3px; }
+.ov-val  { font-size: 20px; font-weight: 500; line-height: 1; }
+.ov-status { display: flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 11px; }
 .ov-time { font-size: 10px; color: var(--text3); margin-top: 3px; }
 
-/* Detail panel */
-.detail { padding: 22px 24px; flex: 1; }
-.detail-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-.detail-header h2 { font-size: 16px; font-weight: 500; }
-.refresh-btn { display: flex; align-items: center; gap: 5px; padding: 5px 12px; font-size: 12px; border: 0.5px solid var(--border2); border-radius: var(--radius-sm); background: transparent; color: var(--text2); cursor: pointer; }
-.refresh-btn:hover { background: var(--surface2); }
-.refresh-btn.spin .ti-refresh { animation: spin 0.8s linear infinite; display: inline-block; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.section-label { font-size: 12px; font-weight: 500; color: var(--text3); display: flex; align-items: center; gap: 6px; margin-bottom: 10px; margin-top: 20px; }
-.section-label:first-of-type { margin-top: 0; }
-
-.info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-.info-card { background: var(--surface2); border-radius: var(--radius-sm); padding: 11px 14px; }
-.info-card-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
-.info-card-val   { font-size: 16px; font-weight: 500; }
-
-.warning-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-.pill { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
+/* Detail */
+.detail { flex: 1; overflow-y: auto; padding: 20px 22px; }
+.detail-header { display: flex; align-items: center; margin-bottom: 16px; }
+.detail-header h2 { font-size: 15px; font-weight: 500; flex: 1; }
+.sec-label { font-size: 11px; font-weight: 600; color: var(--text3); display: flex; align-items: center; gap: 5px; margin-bottom: 9px; margin-top: 18px; text-transform: uppercase; letter-spacing: 0.05em; }
+.sec-label:first-of-type { margin-top: 0; }
+.info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.icard { background: var(--surface2); border-radius: var(--r-sm); padding: 10px 13px; }
+.icard-lbl { font-size: 10px; color: var(--text3); margin-bottom: 3px; }
+.icard-val { font-size: 15px; font-weight: 500; }
+.w-pills { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 9px; }
+.pill { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px; }
 .pill-red    { background: #fef2f2; color: #991b1b; }
 .pill-yellow { background: #fefce8; color: #854d0e; }
 .pill-blue   { background: #eff6ff; color: #1e40af; }
 @media (prefers-color-scheme: dark) {
   .pill-red    { background: #3b1515; color: #fca5a5; }
-  .pill-yellow { background: #3b2e00; color: #fde68a; }
+  .pill-yellow { background: #322700; color: #fde68a; }
   .pill-blue   { background: #0f2040; color: #93c5fd; }
 }
+.rt-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.rcard { background: var(--surface2); border-radius: var(--r-sm); padding: 13px; text-align: center; }
+.rcard-lbl { font-size: 10px; color: var(--text3); margin-bottom: 5px; }
+.rcard-big { font-size: 22px; font-weight: 500; line-height: 1; }
+.rcard-unit { font-size: 10px; color: var(--text3); margin-top: 4px; }
+.chart-wrap { position: relative; width: 100%; height: 190px; margin-top: 2px; }
 
-.rt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.rt-card { background: var(--surface2); border-radius: var(--radius-sm); padding: 14px; text-align: center; }
-.rt-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; }
-.rt-big   { font-size: 24px; font-weight: 500; line-height: 1; }
-.rt-unit  { font-size: 11px; color: var(--text3); margin-top: 5px; }
-
-.chart-wrap { position: relative; width: 100%; height: 200px; }
-
-/* Responsive */
-@media (max-width: 700px) {
-  .layout { flex-direction: column; height: auto; }
-  .sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 0.5px solid var(--border); }
-  .sidebar-section, .sidebar-footer { display: none; }
-  .overview { grid-template-columns: repeat(2, 1fr); }
-  .rt-grid { grid-template-columns: repeat(2, 1fr); }
-  .info-grid { grid-template-columns: 1fr; }
+/* ── Modal base ── */
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+  display: flex; align-items: center; justify-content: center; z-index: 100;
+  opacity: 0; pointer-events: none; transition: opacity 0.18s;
 }
+.modal-bg.show { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface); border-radius: var(--r); padding: 24px;
+  width: 360px; max-width: calc(100vw - 32px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.22);
+  transform: translateY(10px); transition: transform 0.18s;
+}
+.modal-bg.show .modal { transform: translateY(0); }
+.modal h3 { font-size: 15px; font-weight: 500; margin-bottom: 16px; display: flex; align-items: center; gap: 7px; }
+.modal-field { margin-bottom: 12px; }
+.modal-field label { display: block; font-size: 11px; color: var(--text3); margin-bottom: 5px; }
+.modal-field input, .modal-field select {
+  width: 100%; padding: 8px 10px; border-radius: var(--r-sm);
+  border: 0.5px solid var(--border2); background: var(--surface2);
+  color: var(--text); font-size: 13px; outline: none;
+}
+.modal-field input:focus, .modal-field select:focus { border-color: var(--accent); }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+.btn { padding: 7px 16px; border-radius: var(--r-sm); font-size: 13px; cursor: pointer; border: none; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { opacity: 0.9; }
+.btn-ghost { background: var(--surface2); color: var(--text2); border: 0.5px solid var(--border2); }
+.btn-ghost:hover { background: var(--bg); }
+.btn-danger { background: #fef2f2; color: #991b1b; border: 0.5px solid #fecaca; }
+.btn-danger:hover { background: #fee2e2; }
+@media (prefers-color-scheme: dark) {
+  .btn-danger { background: #3b1515; color: #fca5a5; border-color: #7f1d1d; }
+}
+.modal-err { font-size: 12px; color: #ef4444; margin-top: 8px; min-height: 18px; }
+
+/* Station list in admin */
+.station-list-admin { border: 0.5px solid var(--border2); border-radius: var(--r-sm); overflow: hidden; margin-bottom: 12px; max-height: 180px; overflow-y: auto; }
+.sla-row { display: flex; align-items: center; padding: 8px 12px; gap: 8px; border-bottom: 0.5px solid var(--border); font-size: 13px; }
+.sla-row:last-child { border-bottom: none; }
+.sla-name { flex: 1; }
+.sla-no { font-size: 11px; color: var(--text3); }
+.sla-remove { background: transparent; border: none; color: var(--text3); cursor: pointer; padding: 2px 5px; border-radius: 3px; font-size: 13px; }
+.sla-remove:hover { background: #fef2f2; color: #ef4444; }
+
+.spin { animation: spin 0.8s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
+
 <header>
-  <i class="ti ti-waves" style="font-size:20px;color:#3b82f6" aria-hidden="true"></i>
-  <h1>基隆河水位監測系統</h1>
-  <span class="subtitle">經濟部水利署 防災資訊服務網</span>
+  <i class="ti ti-waves" style="font-size:18px;color:var(--accent)" aria-hidden="true"></i>
+  <h1>基隆河汐止段水位監測</h1>
+  <span id="countdown" class="countdown"></span>
+  <button class="auto-toggle" id="autoToggle" onclick="toggleAuto()" title="切換自動更新">
+    <span class="dot-pulse" id="pulseDot"></span>
+    <span class="lbl-on">每10分鐘自動更新</span>
+    <span class="lbl-off">自動更新已暫停</span>
+  </button>
+  <button class="admin-btn" onclick="openLoginModal()">
+    <i class="ti ti-settings" aria-hidden="true"></i> 管理
+  </button>
 </header>
 
 <div class="layout">
   <aside class="sidebar">
-    <div class="sidebar-section">水位站</div>
+    <div class="sb-section">水位站</div>
     <div id="stationList"></div>
-    <div class="sidebar-footer">資料來源<br>經濟部水利署<br>防災資訊服務網<br>Open Data API</div>
+    <div class="sb-footer">資料來源<br>經濟部水利署<br>防災資訊服務網</div>
   </aside>
   <div class="main">
     <div class="overview" id="overviewBar"></div>
     <div class="detail" id="detailPanel">
-      <div style="color:var(--text3);font-size:13px">資料載入中，請稍候…</div>
+      <div style="color:var(--text3);font-size:13px;padding-top:8px">資料載入中，請稍候…</div>
+    </div>
+  </div>
+</div>
+
+<!-- 登入 Modal -->
+<div class="modal-bg" id="loginModal">
+  <div class="modal">
+    <h3><i class="ti ti-lock" aria-hidden="true"></i>管理員登入</h3>
+    <div class="modal-field">
+      <label>管理密碼</label>
+      <input type="password" id="loginPwd" placeholder="請輸入密碼" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="modal-err" id="loginErr"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('loginModal')">取消</button>
+      <button class="btn btn-primary" onclick="doLogin()">登入</button>
+    </div>
+  </div>
+</div>
+
+<!-- 管理 Modal -->
+<div class="modal-bg" id="adminModal">
+  <div class="modal" style="width:440px">
+    <h3><i class="ti ti-settings" aria-hidden="true"></i>水位站管理</h3>
+
+    <div class="modal-field">
+      <label>目前啟用的水位站</label>
+      <div class="station-list-admin" id="adminStationList">載入中…</div>
+    </div>
+
+    <div class="modal-field">
+      <label>新增水位站</label>
+      <select id="addStationSelect">
+        <option value="">— 選擇水利署站點 —</option>
+      </select>
+    </div>
+    <div class="modal-err" id="adminErr"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('adminModal')">關閉</button>
+      <button class="btn btn-primary" id="addBtn" onclick="addStation()">新增</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveStations()">儲存變更</button>
     </div>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-const STATIONS = [
-  { id: '1140H507', name: '江北橋', region: '新北汐止' },
-  { id: '1140H504', name: '社后橋', region: '新北汐止' },
-  { id: '1140H502', name: '五堵',   region: '新北汐止' }
-];
+// ── State ──
+let stations = [];   // { id, name, region }  啟用中
+let meta = {};       // StationNo → Station API 資料
+let rt = {};         // StationNo → RealTime 資料
+let hist = {};       // StationNo → [{date, value}]
+let sel = 0;
+let chart = null;
 
-let meta = {}, rt = {}, hist = {}, sel = 0, chart = null;
+let autoOn = true;
+let countdownVal = 600; // 10 min in seconds
+let countdownTimer = null;
+let refreshTimer = null;
+let adminPwd = '';
+let pendingIds = [];   // 管理介面暫存的 ID 清單
 
-function level(m, wl) {
+// ── Level logic ──
+function lvl(m, wl) {
   if (wl == null) return 'gray';
-  if (m.WarningLevel1 != null && wl >= m.WarningLevel1) return 'red';
-  if (m.WarningLevel2 != null && wl >= m.WarningLevel2) return 'yellow';
-  if (m.WarningLevel3 != null && wl >= m.WarningLevel3) return 'blue';
+  if (m?.WarningLevel1 != null && wl >= m.WarningLevel1) return 'red';
+  if (m?.WarningLevel2 != null && wl >= m.WarningLevel2) return 'yellow';
+  if (m?.WarningLevel3 != null && wl >= m.WarningLevel3) return 'blue';
   return 'green';
 }
-const levelText = { green:'正常', blue:'三級警戒', yellow:'二級警戒', red:'一級警戒', gray:'無資料' };
-const levelColor = { green:'#22c55e', blue:'#3b82f6', yellow:'#eab308', red:'#ef4444', gray:'#9ca3af' };
+const lvlTxt   = { green:'正常', blue:'三級警戒', yellow:'二級警戒', red:'一級警戒', gray:'無資料' };
+const lvlColor = { green:'var(--green)', blue:'var(--blue)', yellow:'var(--yellow)', red:'var(--red)', gray:'var(--gray)' };
 
-async function load() {
-  try {
-    const [mRes, rRes] = await Promise.all([
-      fetch('/api/station'),
-      fetch('/api/realtime')
-    ]);
-    const mData = await mRes.json();
-    const rData = await rRes.json();
-    mData.forEach(m => { meta[m.StationNo] = m; });
-    rData.forEach(r => { rt[r.StationNo] = r; });
-    await loadHist();
-  } catch(e) {
-    loadMock();
-  }
-  render();
+// ── Auto-update ──
+function toggleAuto() {
+  autoOn = !autoOn;
+  document.getElementById('autoToggle').classList.toggle('off', !autoOn);
+  if (autoOn) { countdownVal = 600; startCountdown(); }
+  else { clearInterval(countdownTimer); clearTimeout(refreshTimer); document.getElementById('countdown').textContent = ''; }
 }
 
-function loadMock() {
-  [
-    { StationNo:'1140H507', TopLevel:14.7,  PlanFloodLevel:12.65, WarningLevel1:12.7, WarningLevel2:9.7, WarningLevel3:null },
-    { StationNo:'1140H504', TopLevel:13.33, PlanFloodLevel:10.86, WarningLevel1:11.5, WarningLevel2:8.5, WarningLevel3:null },
-    { StationNo:'1140H502', TopLevel:19.23, PlanFloodLevel:17.66, WarningLevel1:14.9, WarningLevel2:12.0, WarningLevel3:null }
-  ].forEach(m => meta[m.StationNo] = m);
-  const now = new Date();
-  const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-  [
-    { StationNo:'1140H507', WaterLevel:3.2, Time:fmt(now) },
-    { StationNo:'1140H504', WaterLevel:2.8, Time:fmt(now) },
-    { StationNo:'1140H502', WaterLevel:4.5, Time:fmt(now) }
-  ].forEach(r => rt[r.StationNo] = r);
-  STATIONS.forEach(s => genHist(s.id));
+function startCountdown() {
+  clearInterval(countdownTimer);
+  clearTimeout(refreshTimer);
+  document.getElementById('countdown').textContent = fmtCountdown(countdownVal);
+  countdownTimer = setInterval(() => {
+    if (!autoOn) return;
+    countdownVal--;
+    document.getElementById('countdown').textContent = fmtCountdown(countdownVal);
+    if (countdownVal <= 0) { countdownVal = 600; loadData(); }
+  }, 1000);
+}
+
+function fmtCountdown(s) {
+  const m = Math.floor(s / 60), sec = s % 60;
+  return `${m}:${String(sec).padStart(2,'0')}`;
+}
+
+// ── Data loading ──
+async function loadData() {
+  try {
+    const [mRes, rRes] = await Promise.all([fetch('/api/station'), fetch('/api/realtime')]);
+    const mData = await mRes.json();
+    const rData = await rRes.json();
+
+    // Build stations list from meta (preserve order from KV)
+    const newMeta = {}, newRt = {};
+    mData.forEach(m => { newMeta[m.StationNo] = m; });
+    rData.forEach(r => { newRt[r.StationNo] = r; });
+
+    // Rebuild stations array from meta keys (keep existing order if already set)
+    if (stations.length === 0) {
+      stations = mData.map(m => ({
+        id: m.StationNo,
+        name: m.StationName || m.StationNo,
+        region: m.Address ? m.Address.slice(0,5) : ''
+      }));
+    } else {
+      // Update name/region but keep order
+      stations = stations.map(s => {
+        const m = newMeta[s.id];
+        return m ? { id: s.id, name: m.StationName || s.name, region: s.region } : s;
+      });
+    }
+
+    meta = newMeta;
+    rt = newRt;
+
+    await loadHist();
+    render();
+  } catch(e) {
+    loadMock();
+    render();
+  }
 }
 
 async function loadHist() {
-  for (const s of STATIONS) {
+  for (const s of stations) {
     try {
       const res = await fetch(`/api/history?stationId=${s.id}`);
       const data = await res.json();
-      if (data && data.length > 0) {
+      if (data?.length > 0) {
         const byDay = {};
         data.forEach(d => {
-          const day = d.Time ? d.Time.substring(5,10) : null;
-          if (day && d.WaterLevel != null) { (byDay[day] = byDay[day]||[]).push(d.WaterLevel); }
+          const day = d.Time?.substring(5,10);
+          if (day && d.WaterLevel != null) (byDay[day] = byDay[day]||[]).push(d.WaterLevel);
         });
-        hist[s.id] = Object.entries(byDay).map(([k,v])=>({ date:k, value:+(v.reduce((a,b)=>a+b,0)/v.length).toFixed(2) }));
-      } else { genHist(s.id); }
+        hist[s.id] = Object.entries(byDay).map(([k,v])=>({ date:k, value:+(v.reduce((a,b)=>a+b)/v.length).toFixed(2) }));
+      } else genHist(s.id);
     } catch { genHist(s.id); }
   }
 }
 
 function genHist(id) {
-  const base = rt[id] ? rt[id].WaterLevel : 3;
+  const base = rt[id]?.WaterLevel ?? 3;
   hist[id] = Array.from({length:14},(_,i)=>{
     const d=new Date(); d.setDate(d.getDate()-(13-i));
     return { date:`${d.getMonth()+1}/${d.getDate()}`, value:+(base+(Math.random()-.47)*.9).toFixed(2) };
   });
 }
 
+function loadMock() {
+  const mockDefs = [
+    { StationNo:'1140H507', StationName:'江北橋', Address:'新北市汐止區', TopLevel:14.7,  PlanFloodLevel:12.65, WarningLevel1:12.7,  WarningLevel2:9.7  },
+    { StationNo:'1140H504', StationName:'社后橋', Address:'新北市汐止區', TopLevel:13.33, PlanFloodLevel:10.86, WarningLevel1:11.5,  WarningLevel2:8.5  },
+    { StationNo:'1140H502', StationName:'五堵',   Address:'新北市汐止區', TopLevel:19.23, PlanFloodLevel:17.66, WarningLevel1:14.9,  WarningLevel2:12.0 }
+  ];
+  mockDefs.forEach(m => { meta[m.StationNo] = m; });
+  if (stations.length === 0) {
+    stations = mockDefs.map(m => ({ id:m.StationNo, name:m.StationName, region:'新北汐止' }));
+  }
+  const now = new Date();
+  const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  [
+    { StationNo:'1140H507', WaterLevel:3.2, Time:fmt(now) },
+    { StationNo:'1140H504', WaterLevel:2.8, Time:fmt(now) },
+    { StationNo:'1140H502', WaterLevel:4.5, Time:fmt(now) }
+  ].forEach(r => { rt[r.StationNo] = r; });
+  stations.forEach(s => genHist(s.id));
+}
+
+// ── Render ──
 function render() {
-  const list = document.getElementById('stationList');
-  list.innerHTML = STATIONS.map((s,i)=>{
-    const m=meta[s.id]||{}, r=rt[s.id], wl=r?r.WaterLevel:null, lv=level(m,wl);
-    return `<button class="station-btn${i===sel?' active':''}" onclick="pick(${i})">
-      <span class="dot dot-${lv}"></span>
-      <span class="station-name"><strong>${s.name}</strong><small>${s.region}</small></span>
-    </button>`;
-  }).join('');
-
-  const bar = document.getElementById('overviewBar');
-  bar.innerHTML = STATIONS.map((s,i)=>{
-    const m=meta[s.id]||{}, r=rt[s.id], wl=r?r.WaterLevel:null, lv=level(m,wl);
-    return `<div class="ov-cell${i===sel?' active':''}" onclick="pick(${i})">
-      <div class="ov-name">${s.region} ${s.name}</div>
-      <div class="ov-val" style="color:${levelColor[lv]}">${wl!=null?wl.toFixed(2)+' m':'--'}</div>
-      <div class="ov-status"><span class="dot dot-${lv}" style="width:8px;height:8px"></span><span style="color:${levelColor[lv]}">${levelText[lv]}</span></div>
-      <div class="ov-time">${r&&r.Time?r.Time.slice(0,16):''}</div>
-    </div>`;
-  }).join('');
-
+  renderSidebar();
+  renderOverview();
   renderDetail();
 }
 
+function renderSidebar() {
+  document.getElementById('stationList').innerHTML = stations.map((s,i) => {
+    const m=meta[s.id]||{}, r=rt[s.id], wl=r?.WaterLevel??null, lv=lvl(m,wl);
+    return `<button class="station-btn${i===sel?' active':''}" onclick="pick(${i})">
+      <span class="dot dot-${lv}"></span>
+      <span class="sname"><strong>${s.name}</strong><small>${s.region||''}</small></span>
+    </button>`;
+  }).join('');
+}
+
+function renderOverview() {
+  document.getElementById('overviewBar').innerHTML = stations.map((s,i) => {
+    const m=meta[s.id]||{}, r=rt[s.id], wl=r?.WaterLevel??null, lv=lvl(m,wl);
+    return `<div class="ov-cell${i===sel?' active':''}" onclick="pick(${i})">
+      <div class="ov-name">${s.name}</div>
+      <div class="ov-val" style="color:${lvlColor[lv]}">${wl!=null?wl.toFixed(2)+' m':'--'}</div>
+      <div class="ov-status"><span class="dot dot-${lv}" style="width:7px;height:7px"></span><span style="color:${lvlColor[lv]}">${lvlTxt[lv]}</span></div>
+      <div class="ov-time">${r?.Time?r.Time.slice(0,16):''}</div>
+    </div>`;
+  }).join('');
+}
+
 function renderDetail() {
-  const s=STATIONS[sel], m=meta[s.id]||{}, r=rt[s.id], wl=r?r.WaterLevel:null, lv=level(m,wl);
-  const pts=hist[s.id]||[], rate=pts.length>=2?(pts[pts.length-1].value-pts[pts.length-2].value).toFixed(2):null;
+  if (!stations.length) return;
+  const s=stations[sel]||stations[0], m=meta[s.id]||{}, r=rt[s.id], wl=r?.WaterLevel??null, lv=lvl(m,wl);
+  const pts=hist[s.id]||[];
+  const rate = pts.length>=2 ? (pts[pts.length-1].value - pts[pts.length-2].value).toFixed(2) : null;
+
   document.getElementById('detailPanel').innerHTML = `
     <div class="detail-header">
-      <h2>${s.region} · ${s.name}</h2>
-      <button class="refresh-btn" id="rfBtn" onclick="refresh()"><i class="ti ti-refresh" aria-hidden="true"></i> 重新整理</button>
+      <h2>${s.name}　<span style="font-size:12px;font-weight:400;color:var(--text3)">${s.region||''}</span></h2>
     </div>
-    <div class="section-label"><i class="ti ti-info-circle" aria-hidden="true"></i>水位站基本資料</div>
+
+    <div class="sec-label"><i class="ti ti-info-circle" aria-hidden="true"></i>水位站基本資料</div>
     <div class="info-grid">
-      <div class="info-card"><div class="info-card-label">水位堤頂高</div><div class="info-card-val">${m.TopLevel!=null?m.TopLevel.toFixed(2)+' m':'--'}</div></div>
-      <div class="info-card"><div class="info-card-label">計畫洪水位</div><div class="info-card-val">${m.PlanFloodLevel!=null?m.PlanFloodLevel.toFixed(2)+' m':'--'}</div></div>
+      <div class="icard"><div class="icard-lbl">水位堤頂高</div><div class="icard-val">${m.TopLevel!=null?m.TopLevel.toFixed(2)+' m':'--'}</div></div>
+      <div class="icard"><div class="icard-lbl">計畫洪水位</div><div class="icard-val">${m.PlanFloodLevel!=null?m.PlanFloodLevel.toFixed(2)+' m':'--'}</div></div>
     </div>
-    <div class="warning-pills">
+    <div class="w-pills">
       <span class="pill pill-red">一級警戒 ${m.WarningLevel1!=null?m.WarningLevel1.toFixed(2)+' m':'--'}</span>
       <span class="pill pill-yellow">二級警戒 ${m.WarningLevel2!=null?m.WarningLevel2.toFixed(2)+' m':'--'}</span>
-      <span class="pill pill-blue">三級警戒 ${m.WarningLevel3!=null?m.WarningLevel3.toFixed(2)+' m':'--'}</span>
+      ${m.WarningLevel3!=null?`<span class="pill pill-blue">三級警戒 ${m.WarningLevel3.toFixed(2)} m</span>`:''}
     </div>
-    <div class="section-label" style="margin-top:20px"><i class="ti ti-activity" aria-hidden="true"></i>即時水位資料</div>
+
+    <div class="sec-label" style="margin-top:18px"><i class="ti ti-activity" aria-hidden="true"></i>即時水位資料</div>
     <div class="rt-grid">
-      <div class="rt-card"><div class="rt-label">目前水位</div><div class="rt-big" style="color:${levelColor[lv]}">${wl!=null?wl.toFixed(2):'--'}</div><div class="rt-unit">公尺 (m)</div></div>
-      <div class="rt-card"><div class="rt-label">水位變化趨勢</div><div class="rt-big" style="color:${rate>0?'#ef4444':rate<0?'#22c55e':'var(--text)'}">${rate!=null?(rate>0?'↑ +':rate<0?'↓ ':'→ ')+Math.abs(rate):'--'}</div><div class="rt-unit">日均差 (m)</div></div>
-      <div class="rt-card"><div class="rt-label">資料更新時間</div><div class="rt-big" style="font-size:13px;padding-top:6px">${r&&r.Time?r.Time.slice(0,16).replace('T',' '):'--'}</div></div>
+      <div class="rcard">
+        <div class="rcard-lbl">目前水位</div>
+        <div class="rcard-big" style="color:${lvlColor[lv]}">${wl!=null?wl.toFixed(2):'--'}</div>
+        <div class="rcard-unit">公尺 (m)</div>
+      </div>
+      <div class="rcard">
+        <div class="rcard-lbl">水位趨勢</div>
+        <div class="rcard-big" style="color:${rate>0?'var(--red)':rate<0?'var(--green)':'var(--text)'};font-size:18px">
+          ${rate!=null?(+rate>0?'↑ +':+rate<0?'↓ ':'→ ')+Math.abs(rate):'--'}
+        </div>
+        <div class="rcard-unit">日均差 (m)</div>
+      </div>
+      <div class="rcard">
+        <div class="rcard-lbl">資料更新</div>
+        <div class="rcard-big" style="font-size:13px;padding-top:5px">${r?.Time?r.Time.slice(0,16).replace('T',' '):'--'}</div>
+      </div>
     </div>
-    <div class="section-label" style="margin-top:20px"><i class="ti ti-chart-line" aria-hidden="true"></i>近兩週水位變化</div>
-    <div class="chart-wrap"><canvas id="wChart" role="img" aria-label="${s.name}近兩週水位折線圖">近兩週每日平均水位</canvas></div>
+
+    <div class="sec-label" style="margin-top:18px"><i class="ti ti-chart-line" aria-hidden="true"></i>近兩週水位變化</div>
+    <div class="chart-wrap"><canvas id="wChart" role="img" aria-label="${s.name}近兩週水位折線圖"></canvas></div>
   `;
   drawChart(s.id, m);
 }
 
 function drawChart(id, m) {
-  if (chart) { chart.destroy(); chart=null; }
+  if (chart) { chart.destroy(); chart = null; }
   const pts = hist[id]||[];
   if (!pts.length) return;
   const vals=pts.map(p=>p.value), mn=Math.min(...vals), mx=Math.max(...vals), pad=(mx-mn)*0.3||0.5;
@@ -274,16 +470,148 @@ function drawChart(id, m) {
   });
 }
 
-function pick(i) { sel=i; render(); }
-async function refresh() {
-  const btn=document.getElementById('rfBtn');
-  if(btn) btn.classList.add('spin');
-  meta={}; rt={}; hist={};
-  await load();
-  if(btn) btn.classList.remove('spin');
+function pick(i) { sel = i; renderSidebar(); renderOverview(); renderDetail(); }
+
+// ── Admin ──
+function openLoginModal() {
+  document.getElementById('loginPwd').value = '';
+  document.getElementById('loginErr').textContent = '';
+  openModal('loginModal');
+  setTimeout(() => document.getElementById('loginPwd').focus(), 200);
 }
 
-load();
+async function doLogin() {
+  const pwd = document.getElementById('loginPwd').value.trim();
+  if (!pwd) { document.getElementById('loginErr').textContent = '請輸入密碼'; return; }
+  try {
+    const res = await fetch(`/api/admin?action=verify&password=${encodeURIComponent(pwd)}`);
+    if (res.ok) {
+      adminPwd = pwd;
+      closeModal('loginModal');
+      await openAdminModal();
+    } else {
+      const d = await res.json();
+      document.getElementById('loginErr').textContent = d.error || '密碼錯誤';
+    }
+  } catch(e) {
+    document.getElementById('loginErr').textContent = '連線失敗：' + e.message;
+  }
+}
+
+async function openAdminModal() {
+  openModal('adminModal');
+  document.getElementById('addStationSelect').innerHTML = '<option value="">載入中…</option>';
+  document.getElementById('adminErr').textContent = '';
+
+  // 取得目前啟用清單
+  try {
+    const res = await fetch(`/api/admin?action=get&password=${encodeURIComponent(adminPwd)}`);
+    const d = await res.json();
+    pendingIds = [...(d.ids || [])];
+  } catch { pendingIds = stations.map(s => s.id); }
+
+  renderAdminList();
+
+  // 撈全部可用站點
+  try {
+    const res = await fetch('/api/all-stations');
+    const all = await res.json();
+    const select = document.getElementById('addStationSelect');
+    select.innerHTML = '<option value="">— 選擇要新增的站點 —</option>';
+    all.sort((a,b)=>(a.StationName||'').localeCompare(b.StationName||'')).forEach(s => {
+      if (!pendingIds.includes(s.StationNo)) {
+        const opt = document.createElement('option');
+        opt.value = s.StationNo;
+        opt.dataset.name = s.StationName || s.StationNo;
+        opt.textContent = `${s.StationName||s.StationNo}（${s.StationNo}）`;
+        select.appendChild(opt);
+      }
+    });
+  } catch(e) {
+    document.getElementById('addStationSelect').innerHTML = '<option value="">無法載入站點列表</option>';
+  }
+}
+
+function renderAdminList() {
+  const allMeta = meta;
+  document.getElementById('adminStationList').innerHTML = pendingIds.length === 0
+    ? '<div class="sla-row" style="color:var(--text3)">尚無站點</div>'
+    : pendingIds.map(id => {
+        const m = allMeta[id];
+        const name = m?.StationName || id;
+        return `<div class="sla-row">
+          <span class="sname">${name}</span>
+          <span class="sla-no">${id}</span>
+          <button class="sla-remove" onclick="removeStation('${id}')" title="移除"><i class="ti ti-x" aria-hidden="true"></i></button>
+        </div>`;
+      }).join('');
+}
+
+function removeStation(id) {
+  if (pendingIds.length <= 1) { document.getElementById('adminErr').textContent = '至少需保留一個站點'; return; }
+  pendingIds = pendingIds.filter(i => i !== id);
+  // Refresh select: add back the removed station
+  const select = document.getElementById('addStationSelect');
+  const m = meta[id];
+  if (m) {
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.dataset.name = m.StationName || id;
+    opt.textContent = `${m.StationName||id}（${id}）`;
+    select.appendChild(opt);
+  }
+  renderAdminList();
+  document.getElementById('adminErr').textContent = '';
+}
+
+function addStation() {
+  const sel = document.getElementById('addStationSelect');
+  const id = sel.value;
+  if (!id) { document.getElementById('adminErr').textContent = '請先選擇一個站點'; return; }
+  if (pendingIds.includes(id)) { document.getElementById('adminErr').textContent = '該站點已在清單中'; return; }
+  pendingIds.push(id);
+  // Remove from select
+  const opt = sel.querySelector(`option[value="${id}"]`);
+  if (opt) opt.remove();
+  sel.value = '';
+  renderAdminList();
+  document.getElementById('adminErr').textContent = '';
+}
+
+async function saveStations() {
+  document.getElementById('adminErr').textContent = '';
+  const saveBtn = document.getElementById('saveBtn');
+  saveBtn.textContent = '儲存中…'; saveBtn.disabled = true;
+  try {
+    const res = await fetch('/api/admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: adminPwd, ids: pendingIds })
+    });
+    const d = await res.json();
+    if (res.ok) {
+      closeModal('adminModal');
+      // Reset & reload
+      stations = [];  meta = {};  rt = {};  hist = {};
+      await loadData();
+    } else {
+      document.getElementById('adminErr').textContent = d.error || '儲存失敗';
+    }
+  } catch(e) {
+    document.getElementById('adminErr').textContent = '連線失敗：' + e.message;
+  } finally {
+    saveBtn.textContent = '儲存變更'; saveBtn.disabled = false;
+  }
+}
+
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-bg').forEach(bg => {
+  bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('show'); });
+});
+
+// ── Init ──
+loadData().then(() => { if (autoOn) { countdownVal = 600; startCountdown(); } });
 </script>
 </body>
 </html>

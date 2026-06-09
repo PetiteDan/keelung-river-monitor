@@ -128,10 +128,7 @@ header .subtitle { font-size: 12px; color: var(--text3); }
 const STATIONS = [
   { id: '1140H507', name: '江北橋', region: '新北汐止' },
   { id: '1140H504', name: '社后橋', region: '新北汐止' },
-  { id: '1140H502', name: '五堵',   region: '新北汐止' },
-  { id: '1140H110', name: '員山子', region: '新北瑞芳' },
-  { id: '1140H503', name: '大華橋', region: '基隆七堵' },
-  { id: '1140H508', name: '暖江橋', region: '基隆暖暖' }
+  { id: '1140H502', name: '五堵',   region: '新北汐止' }
 ];
 
 let meta = {}, rt = {}, hist = {}, sel = 0, chart = null;
@@ -165,22 +162,16 @@ async function load() {
 
 function loadMock() {
   [
-    { StationNo:'1140H507', TopLevel:14.7,  PlanFloodLevel:12.65, WarningLevel1:12.7,  WarningLevel2:9.7,  WarningLevel3:null },
-    { StationNo:'1140H504', TopLevel:13.33, PlanFloodLevel:10.86, WarningLevel1:11.5,  WarningLevel2:8.5,  WarningLevel3:null },
-    { StationNo:'1140H502', TopLevel:19.23, PlanFloodLevel:17.66, WarningLevel1:14.9,  WarningLevel2:12.0, WarningLevel3:null },
-    { StationNo:'1140H110', TopLevel:52.69, PlanFloodLevel:50.02, WarningLevel1:50.3,  WarningLevel2:47.3, WarningLevel3:null },
-    { StationNo:'1140H503', TopLevel:24.34, PlanFloodLevel:19.72, WarningLevel1:20.7,  WarningLevel2:17.3, WarningLevel3:null },
-    { StationNo:'1140H508', TopLevel:null,  PlanFloodLevel:null,  WarningLevel1:21.7,  WarningLevel2:19.0, WarningLevel3:null }
+    { StationNo:'1140H507', TopLevel:14.7,  PlanFloodLevel:12.65, WarningLevel1:12.7, WarningLevel2:9.7, WarningLevel3:null },
+    { StationNo:'1140H504', TopLevel:13.33, PlanFloodLevel:10.86, WarningLevel1:11.5, WarningLevel2:8.5, WarningLevel3:null },
+    { StationNo:'1140H502', TopLevel:19.23, PlanFloodLevel:17.66, WarningLevel1:14.9, WarningLevel2:12.0, WarningLevel3:null }
   ].forEach(m => meta[m.StationNo] = m);
   const now = new Date();
   const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   [
-    { StationNo:'1140H507', WaterLevel:3.2,  Time:fmt(now) },
-    { StationNo:'1140H504', WaterLevel:2.8,  Time:fmt(now) },
-    { StationNo:'1140H502', WaterLevel:4.5,  Time:fmt(now) },
-    { StationNo:'1140H110', WaterLevel:43.85, Time:fmt(now) },
-    { StationNo:'1140H503', WaterLevel:11.3, Time:fmt(now) },
-    { StationNo:'1140H508', WaterLevel:17.6, Time:fmt(now) }
+    { StationNo:'1140H507', WaterLevel:3.2, Time:fmt(now) },
+    { StationNo:'1140H504', WaterLevel:2.8, Time:fmt(now) },
+    { StationNo:'1140H502', WaterLevel:4.5, Time:fmt(now) }
   ].forEach(r => rt[r.StationNo] = r);
   STATIONS.forEach(s => genHist(s.id));
 }

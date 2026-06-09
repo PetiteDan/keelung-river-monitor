@@ -13,6 +13,8 @@ export default async function handler(req, res) {
 
     const response = await fetch('https://fhy.wra.gov.tw/WraApi/v1/Water/RealTimeInfo');
     const data = await response.json();
+
+    // RealTimeInfo 包含所有站（含員山子 1140H118），直接過濾
     const filtered = data.filter(s => ids.includes(s.StationNo));
     res.status(200).json(filtered);
   } catch (e) {

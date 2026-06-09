@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>基隆河常用水位站點監測</title>
+<title>常用水位站點監測</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -189,7 +189,7 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
 
 <header>
   <i class="ti ti-waves" style="font-size:18px;color:var(--accent)" aria-hidden="true"></i>
-  <h1>基隆河常用水位站點監測</h1>
+  <h1>常用水位站點監測</h1>
 </header>
 
 <div class="layout">
@@ -209,7 +209,13 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
         <i class="ti ti-settings" aria-hidden="true"></i> 管理站點
       </button>
     </div>
-    <div class="sb-footer">資料來源<br>經濟部水利署<br>防災資訊服務網</div>
+    <div class="sb-footer">
+      <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:0.5px solid var(--border)">
+        <span style="font-size:10px;color:var(--text3)">v1.3.0</span>
+        <span style="font-size:10px;color:var(--text3);margin-left:6px">淡水河流域監測</span>
+      </div>
+      資料來源<br>經濟部水利署<br>防災資訊服務網
+    </div>
   </aside>
   <div class="main">
     <div class="overview" id="overviewBar"></div>
@@ -543,23 +549,77 @@ async function openAdminModal() {
     const res = await fetch('/api/all-stations');
     const all = await res.json();
     // 快取全部站點 meta（含名稱），供 renderAdminList 顯示正確站名
-    all.forEach(s => { allStationsMeta[s.StationNo] = s; });
+    all.forEach(s => { allStationsMeta[s.StationNo] = s; }); // includes river field from all-stations API
     const select = document.getElementById('addStationSelect');
     select.innerHTML = '<option value="">— 選擇要新增的站點 —</option>';
-    all.sort((a,b)=>(a.StationName||'').localeCompare(b.StationName||'')).forEach(s => {
-      if (!pendingIds.includes(s.StationNo)) {
+    // 依支流分組
+    const riverOrder = ['基隆河','淡水河幹流','新店溪','大漢溪','景美溪','北勢溪','南勢溪','三峽河','磺溪'];
+    const groups = {};
+    all.forEach(s => {
+      if (pendingIds.includes(s.StationNo)) return;
+      const r = s.river || '其他';
+      (groups[r] = groups[r] || []).push(s);
+    });
+    riverOrder.forEach(river => {
+      const ss = groups[river];
+      if (!ss || ss.length === 0) return;
+      const og = document.createElement('optgroup');
+      og.label = river;
+      ss.forEach(s => {
         const opt = document.createElement('option');
         opt.value = s.StationNo;
         opt.dataset.name = s.StationName || s.StationNo;
-        opt.textContent = `${s.StationName||s.StationNo}（${s.StationNo}）`;
-        select.appendChild(opt);
-      }
+        opt.textContent = `${s.StationName||s.StationNo}　${s.Address||''}`;
+        og.appendChild(opt);
+      });
+      select.appendChild(og);
+    });
+    // 其他未歸類
+    Object.keys(groups).filter(r => !riverOrder.includes(r)).forEach(river => {
+      const og = document.createElement('optgroup');
+      og.label = river;
+      (groups[river]||[]).forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.StationNo;
+        opt.dataset.name = s.StationName || s.StationNo;
+        opt.textContent = `${s.StationName||s.StationNo}　${s.Address||''}`;
+        og.appendChild(opt);
+      });
+      select.appendChild(og);
     });
     // 取得快取後重新渲染清單，讓新加入的站點顯示正確名稱
     renderAdminList();
   } catch(e) {
     document.getElementById('addStationSelect').innerHTML = '<option value="">無法載入站點列表</option>';
   }
+}
+
+function rebuildSelect() {
+  const select = document.getElementById('addStationSelect');
+  if (!select) return;
+  const riverOrder = ['基隆河','淡水河幹流','新店溪','大漢溪','景美溪','北勢溪','南勢溪','三峽河','磺溪'];
+  const all = Object.values(allStationsMeta);
+  const groups = {};
+  all.forEach(s => {
+    if (pendingIds.includes(s.StationNo)) return;
+    const r = s.river || '其他';
+    (groups[r] = groups[r] || []).push(s);
+  });
+  select.innerHTML = '<option value="">— 選擇要新增的站點 —</option>';
+  riverOrder.forEach(river => {
+    const ss = groups[river];
+    if (!ss || ss.length === 0) return;
+    const og = document.createElement('optgroup');
+    og.label = river;
+    ss.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.StationNo;
+      opt.dataset.name = s.StationName || s.StationNo;
+      opt.textContent = `${s.StationName||s.StationNo}　${s.Address||''}`;
+      og.appendChild(opt);
+    });
+    select.appendChild(og);
+  });
 }
 
 function renderAdminList() {
@@ -623,15 +683,8 @@ function removeStation(id) {
   if (pendingIds.length <= 1) { document.getElementById('adminErr').textContent = '至少需保留一個站點'; return; }
   pendingIds = pendingIds.filter(i => i !== id);
   // Refresh select: add back the removed station
-  const select = document.getElementById('addStationSelect');
-  const m = allStationsMeta[id] || meta[id];
-  if (m) {
-    const opt = document.createElement('option');
-    opt.value = id;
-    opt.dataset.name = m.StationName || id;
-    opt.textContent = `${m.StationName||id}（${id}）`;
-    select.appendChild(opt);
-  }
+  // 重建下拉選單（保持分組正確）
+  rebuildSelect();
   renderAdminList();
   document.getElementById('adminErr').textContent = '';
 }

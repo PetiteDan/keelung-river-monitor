@@ -104,8 +104,8 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
 }
 .ib-cell:last-child { border-right: none; flex: 1; }
 .ib-lbl {
-  font-size: 10px; letter-spacing: .07em; text-transform: uppercase;
-  color: var(--text3); white-space: nowrap;
+  font-size: 12px; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--text3); white-space: nowrap; font-weight: 500;
 }
 /* Calendar card — compact horizontal */
 .cal-card {
@@ -147,7 +147,7 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
 .cal-lunar-txt { font-size: 13px; color: var(--text2); white-space: nowrap; }
 /* Clock */
 .ib-clock {
-  font-size: 32px; font-weight: 300; letter-spacing: .04em;
+  font-size: 34px; font-weight: 300; letter-spacing: .04em;
   font-variant-numeric: tabular-nums; color: var(--text);
   animation: ibUp .4s .1s ease both;
 }
@@ -156,10 +156,10 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
 /* Weather */
 .wx-wrap { display: flex; align-items: center; gap: 10px; animation: ibUp .4s .14s ease both; }
 .wx-svg { width: 36px; height: 36px; flex-shrink: 0; }
-.wx-desc { font-size: 14px; color: var(--text2); }
+.wx-desc { font-size: 15px; color: var(--text2); margin-bottom: 2px; }
 .wx-temp-row { display: flex; align-items: baseline; gap: 5px; }
-.wx-cur { font-size: 26px; font-weight: 500; color: var(--text); }
-.wx-range { font-size: 13px; color: var(--text3); }
+.wx-cur { font-size: 28px; font-weight: 500; color: var(--text); }
+.wx-range { font-size: 14px; color: var(--text3); }
 /* Rain */
 .rain-grid { display: flex; gap: 8px; height: 76px; }
 .rpill {
@@ -177,9 +177,9 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
 }
 .rpill:nth-child(1)::after{animation-delay:.5s} .rpill:nth-child(2)::after{animation-delay:.62s} .rpill:nth-child(3)::after{animation-delay:.74s}
 @keyframes ibBar { from{transform:scaleX(0)} to{transform:scaleX(1)} }
-.rp-lbl { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
-.rp-val { font-size: 20px; font-weight: 500; }
-.rp-unit { font-size: 12px; color: var(--text3); }
+.rp-lbl { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+.rp-val { font-size: 22px; font-weight: 500; }
+.rp-unit { font-size: 13px; color: var(--text3); }
 .rpill.low  { color: #1D9E75; }
 .rpill.mid  { color: #BA7517; }
 .rpill.high { color: #E24B4A; }
@@ -337,7 +337,7 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
         <div class="ib-clock" id="ibClock">--<span class="ib-colon">:</span>--<span class="ib-colon">:</span>--</div>
       </div>
       <div class="ib-cell" style="flex-direction:column;align-items:flex-start;justify-content:center;gap:4px">
-        <div class="ib-lbl"><i class="ti ti-map-pin" style="font-size:11px" aria-hidden="true"></i>汐止天氣</div>
+        <div class="ib-lbl"><i class="ti ti-map-pin" style="font-size:12px" aria-hidden="true"></i>新北市汐止區即時天氣</div>
         <div class="wx-wrap" id="ibWxWrap">
           <div class="wx-svg" id="ibWxIcon"><i class="ti ti-cloud" style="font-size:44px;color:var(--text3)" aria-hidden="true"></i></div>
           <div>
@@ -346,6 +346,10 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
             <div class="wx-temp-row">
               <span class="wx-cur" id="ibWxTemp"></span>
               <span class="wx-range" id="ibWxRange"></span>
+            </div>
+            <div style="display:flex;gap:12px;margin-top:3px">
+              <span style="font-size:13px;color:var(--text3)">濕度 <span style="color:var(--text2);font-weight:500" id="ibHumidity">--</span> %</span>
+              <span style="font-size:13px;color:var(--text3)">氣壓 <span style="color:var(--text2);font-weight:500" id="ibPressure">--</span> hPa</span>
             </div>
           </div>
         </div>
@@ -625,6 +629,11 @@ function applyWeatherToBar(d) {
     const el = document.getElementById('ibWxTime');
     if (el) el.textContent = `更新 ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`;
   }
+  // 濕度與氣壓
+  const hmEl = document.getElementById('ibHumidity');
+  if (hmEl) hmEl.textContent = d.humidity != null ? Math.round(d.humidity) : '--';
+  const prEl = document.getElementById('ibPressure');
+  if (prEl) prEl.textContent = d.pressure != null ? d.pressure.toFixed(1) : '--';
   // 累積雨量 pills
   const rc = v => v==null?'low': +v>=50?'high': +v>=15?'mid':'low';
   const setR = (vi, pi, val) => {

@@ -8,8 +8,7 @@ export default async function handler(req, res) {
   const toNum = v => {
     if (v == null) return null;
     const n = +v;
-    if (isNaN(n) || n <= -98) return null;
-    return n;
+    return (isNaN(n) || n <= -98) ? null : n;
   };
 
   try {
@@ -21,30 +20,24 @@ export default async function handler(req, res) {
     const wxJson   = await wxRes.json();
     const rainJson = await rainRes.json();
 
-    // ── 氣象站 ──
     const wxSt = wxJson?.records?.Station?.[0];
     const wxEl = wxSt?.WeatherElement || {};
-    // 從 debug 截圖確認：
-    // wxEl.Now.AirTemperature = "23.6"（字串）
-    // wxEl.DailyExtreme.DailyHigh.TemperatureInfo.AirTemperature = "24.4"
-    // wxEl.DailyExtreme.DailyLow.TemperatureInfo.AirTemperature = "22.8"
-    // wxEl.Now.Precipitation = "15.0"（即時降水）
-    const now    = wxEl.Now      || {};
-    const daily  = wxEl.DailyExtreme || {};
 
-    const temperature = toNum(now.AirTemperature);
-    const tempMax     = toNum(daily?.DailyHigh?.TemperatureInfo?.AirTemperature);
-    const tempMin     = toNum(daily?.DailyLow?.TemperatureInfo?.AirTemperature);
-    const precipNow   = toNum(now.Precipitation);
+    // ── 從 debug 截圖確認的正確路徑 ──
+    // WeatherElement.AirTemperature = "23.6"  ← 直接在 wxEl 下，不在 Now 裡
+    // WeatherElement.Now.Precipitation = "15.0"
+    // WeatherElement.DailyExtreme.DailyHigh.TemperatureInfo.AirTemperature = "24.4"
+    // WeatherElement.DailyExtreme.DailyLow.TemperatureInfo.AirTemperature  = "22.8"
+    const temperature = toNum(wxEl.AirTemperature);
+    const tempMax     = toNum(wxEl.DailyExtreme?.DailyHigh?.TemperatureInfo?.AirTemperature);
+    const tempMin     = toNum(wxEl.DailyExtreme?.DailyLow?.TemperatureInfo?.AirTemperature);
+    const precipNow   = toNum(wxEl.Now?.Precipitation);
 
-    // ── 雨量站（找新北市汐止）──
+    // ── 雨量：O-A0002-001 新北市，找汐止站 ──
     const allStations = rainJson?.records?.Station || [];
-    const rainSt  = allStations.find(s => s.StationName?.includes('汐止'))
-                 || allStations.find(s => s.GeoInfo?.CountyName?.includes('汐止'))
-                 || null;
+    const rainSt  = allStations.find(s => s.StationName?.includes('汐止')) || null;
     const precip  = rainSt?.RainfallElement?.Precipitation || [];
 
-    // Duration 值未知，先把全部列出
     const findRain = (...durs) => {
       for (const d of durs) {
         const hit = precip.find(p => String(p.Duration) === String(d));
@@ -62,14 +55,14 @@ export default async function handler(req, res) {
       tempMax,
       tempMin,
       precipNow,
-      rain12h:   findRain('12h','12hr','12H','720'),
-      rain24h:   findRain('24h','24hr','24H','1440'),
-      rain48h:   findRain('48h','48hr','48H','2880'),
+      rain12h:   findRain('12h','12hr','12H'),
+      rain24h:   findRain('24h','24hr','24H'),
+      rain48h:   findRain('48h','48hr','48H'),
       rainToday: findRain('today','Today','本日'),
       _debug: {
-        wx_now_keys:   Object.keys(now),
-        rain_station:  rainSt?.StationName,
-        precip_all:    precip,
+        wx_el_keys:   Object.keys(wxEl),
+        rain_station: rainSt?.StationName,
+        precip_all:   precip,
       }
     });
   } catch (e) {

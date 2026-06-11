@@ -95,11 +95,11 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
 .info-bar {
   display: flex; align-items: stretch;
   border-bottom: 0.5px solid var(--border);
-  background: var(--surface); flex-shrink: 0; height: 56px;
+  background: var(--surface); flex-shrink: 0; height: 112px;
 }
 .ib-cell {
-  display: flex; align-items: center; gap: 10px;
-  padding: 0 16px; border-right: 0.5px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 20px; border-right: 0.5px solid var(--border);
   position: relative; overflow: hidden; flex-shrink: 0;
 }
 .ib-cell:last-child { border-right: none; flex: 1; }
@@ -111,43 +111,43 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
 .cal-card {
   display: flex; align-items: stretch;
   border-radius: var(--r-sm); overflow: hidden;
-  border: 0.5px solid var(--border); height: 38px;
+  border: 0.5px solid var(--border); height: 76px;
   animation: ibUp .45s ease both;
 }
 .cal-header {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 0 10px;
-  background: #378ADD; min-width: 52px;
+  padding: 0 14px;
+  background: #378ADD; min-width: 62px;
 }
 .cal-header.weekend { background: #E24B4A; }
-.cal-year-row { font-size: 9px; color: rgba(255,255,255,0.8); letter-spacing: .03em; line-height: 1; }
-.cal-month-row { font-size: 12px; font-weight: 500; color: #fff; line-height: 1.3; }
+.cal-year-row { font-size: 11px; color: rgba(255,255,255,0.85); letter-spacing: .03em; line-height: 1; }
+.cal-month-row { font-size: 14px; font-weight: 500; color: #fff; line-height: 1.3; }
 .cal-body {
   background: var(--surface);
-  display: flex; align-items: center; gap: 5px;
-  padding: 0 10px;
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 14px;
 }
 .cal-day-num {
-  font-size: 22px; font-weight: 500; line-height: 1;
+  font-size: 36px; font-weight: 500; line-height: 1;
   color: var(--text); font-variant-numeric: tabular-nums;
 }
 .cal-day-num.weekend { color: #E24B4A; }
-.cal-weekday-row { font-size: 11px; color: var(--text2); }
+.cal-weekday-row { font-size: 13px; color: var(--text2); }
 .cal-footer {
   background: var(--surface2);
   border-left: 0.5px solid var(--border);
-  display: flex; align-items: center; gap: 3px;
-  padding: 0 8px;
+  display: flex; align-items: center; gap: 4px;
+  padding: 0 12px;
 }
 .cal-lunar-badge {
   font-size: 9px; padding: 1px 4px; border-radius: 20px;
   background: var(--surface); color: var(--text3);
   border: 0.5px solid var(--border); flex-shrink: 0;
 }
-.cal-lunar-txt { font-size: 11px; color: var(--text2); white-space: nowrap; }
+.cal-lunar-txt { font-size: 13px; color: var(--text2); white-space: nowrap; }
 /* Clock */
 .ib-clock {
-  font-size: 20px; font-weight: 300; letter-spacing: .04em;
+  font-size: 32px; font-weight: 300; letter-spacing: .04em;
   font-variant-numeric: tabular-nums; color: var(--text);
   animation: ibUp .4s .1s ease both;
 }
@@ -156,15 +156,15 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
 /* Weather */
 .wx-wrap { display: flex; align-items: center; gap: 10px; animation: ibUp .4s .14s ease both; }
 .wx-svg { width: 36px; height: 36px; flex-shrink: 0; }
-.wx-desc { font-size: 12px; color: var(--text2); }
+.wx-desc { font-size: 14px; color: var(--text2); }
 .wx-temp-row { display: flex; align-items: baseline; gap: 5px; }
-.wx-cur { font-size: 16px; font-weight: 500; color: var(--text); }
-.wx-range { font-size: 11px; color: var(--text3); }
+.wx-cur { font-size: 26px; font-weight: 500; color: var(--text); }
+.wx-range { font-size: 13px; color: var(--text3); }
 /* Rain */
-.rain-grid { display: flex; gap: 6px; height: 38px; }
+.rain-grid { display: flex; gap: 8px; height: 76px; }
 .rpill {
-  display: flex; align-items: center; gap: 8px;
-  padding: 0 12px; border-radius: var(--r-sm);
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 16px; border-radius: var(--r-sm);
   background: var(--surface2); border: 0.5px solid var(--border);
   position: relative; overflow: hidden;
   animation: ibUp .4s ease both;
@@ -177,9 +177,9 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
 }
 .rpill:nth-child(1)::after{animation-delay:.5s} .rpill:nth-child(2)::after{animation-delay:.62s} .rpill:nth-child(3)::after{animation-delay:.74s}
 @keyframes ibBar { from{transform:scaleX(0)} to{transform:scaleX(1)} }
-.rp-lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
-.rp-val { font-size: 15px; font-weight: 500; }
-.rp-unit { font-size: 10px; color: var(--text3); }
+.rp-lbl { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+.rp-val { font-size: 20px; font-weight: 500; }
+.rp-unit { font-size: 12px; color: var(--text3); }
 .rpill.low  { color: #1D9E75; }
 .rpill.mid  { color: #BA7517; }
 .rpill.high { color: #E24B4A; }
@@ -332,13 +332,14 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
           </div>
         </div>
       </div>
-      <div class="ib-cell">
-        <div class="ib-lbl"><i class="ti ti-clock" style="font-size:11px" aria-hidden="true"></i></div>
+      <div class="ib-cell" style="flex-direction:column;align-items:flex-start;justify-content:center;gap:4px">
+        <div class="ib-lbl"><i class="ti ti-clock" style="font-size:11px" aria-hidden="true"></i>目前時間</div>
         <div class="ib-clock" id="ibClock">--<span class="ib-colon">:</span>--<span class="ib-colon">:</span>--</div>
       </div>
-      <div class="ib-cell">
+      <div class="ib-cell" style="flex-direction:column;align-items:flex-start;justify-content:center;gap:4px">
+        <div class="ib-lbl"><i class="ti ti-map-pin" style="font-size:11px" aria-hidden="true"></i>汐止天氣</div>
         <div class="wx-wrap" id="ibWxWrap">
-          <div class="wx-svg" id="ibWxIcon"><i class="ti ti-cloud" style="font-size:30px;color:var(--text3)" aria-hidden="true"></i></div>
+          <div class="wx-svg" id="ibWxIcon"><i class="ti ti-cloud" style="font-size:44px;color:var(--text3)" aria-hidden="true"></i></div>
           <div>
             <div class="wx-desc" id="ibWxDesc"><span class="ib-loading">天氣載入中…</span></div>
             <div class="wx-temp-row">
@@ -348,23 +349,22 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
           </div>
         </div>
       </div>
-      <div class="ib-cell">
-        <div class="ib-lbl"><span class="ib-pulse"></span>&nbsp;雨量</div>
+      <div class="ib-cell" style="flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;flex:1">
+        <div class="ib-lbl"><span class="ib-pulse"></span>&nbsp;累積雨量<span style="font-size:10px;color:var(--text3);margin-left:6px" id="ibWxTime"></span></div>
         <div class="rain-grid">
           <div class="rpill low" id="ibPill12">
             <div class="rp-lbl">12hr</div>
-            <div style="display:flex;align-items:baseline;gap:2px"><span class="rp-val" id="ibR12">--</span><span class="rp-unit">mm</span></div>
+            <div style="display:flex;align-items:baseline;gap:3px"><span class="rp-val" id="ibR12">--</span><span class="rp-unit">mm</span></div>
           </div>
           <div class="rpill low" id="ibPill24">
             <div class="rp-lbl">24hr</div>
-            <div style="display:flex;align-items:baseline;gap:2px"><span class="rp-val" id="ibR24">--</span><span class="rp-unit">mm</span></div>
+            <div style="display:flex;align-items:baseline;gap:3px"><span class="rp-val" id="ibR24">--</span><span class="rp-unit">mm</span></div>
           </div>
           <div class="rpill low" id="ibPill48">
             <div class="rp-lbl">48hr</div>
-            <div style="display:flex;align-items:baseline;gap:2px"><span class="rp-val" id="ibR48">--</span><span class="rp-unit">mm</span></div>
+            <div style="display:flex;align-items:baseline;gap:3px"><span class="rp-val" id="ibR48">--</span><span class="rp-unit">mm</span></div>
           </div>
         </div>
-        <span style="font-size:10px;color:var(--text3);margin-left:8px" id="ibWxTime"></span>
       </div>
     </div>
     <div class="overview" id="overviewBar"></div>
@@ -560,13 +560,13 @@ const WD_NAMES = ['日','一','二','三','四','五','六'];
 const MO_NAMES = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
 
 const WX_SVG = {
-  sun:`<svg viewBox="0 0 52 52" width="36" height="36" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="26" cy="26" r="10" fill="#FDE68A" stroke="#F59E0B" stroke-width="2.5"/><g stroke="#F59E0B" stroke-width="2.2"><line x1="26" y1="5" x2="26" y2="11"/><line x1="26" y1="41" x2="26" y2="47"/><line x1="5" y1="26" x2="11" y2="26"/><line x1="41" y1="26" x2="47" y2="26"/><line x1="10.5" y1="10.5" x2="14.5" y2="14.5"/><line x1="37.5" y1="37.5" x2="41.5" y2="41.5"/><line x1="41.5" y1="10.5" x2="37.5" y2="14.5"/><line x1="14.5" y1="37.5" x2="10.5" y2="41.5"/></g></svg>`,
-  partcloud:`<svg viewBox="0 0 52 52" width="36" height="36" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="20" cy="20" r="8" fill="#FDE68A" stroke="#F59E0B" stroke-width="2"/><g stroke="#F59E0B" stroke-width="1.8"><line x1="20" y1="7" x2="20" y2="11"/><line x1="20" y1="29" x2="20" y2="33"/><line x1="7" y1="20" x2="11" y2="20"/><line x1="29" y1="20" x2="33" y2="20"/><line x1="10.6" y1="10.6" x2="13.4" y2="13.4"/><line x1="26.6" y1="26.6" x2="29.4" y2="29.4"/><line x1="29.4" y1="10.6" x2="26.6" y2="13.4"/></g><path d="M39 42H23a7 7 0 0 1 0-14h.9A8.5 8.5 0 0 1 39 34a5 5 0 0 1 0 8z" fill="#E2E8F0" stroke="#94A3B8" stroke-width="2"/></svg>`,
-  cloud:`<svg viewBox="0 0 52 52" width="36" height="36" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M40 36H16a10 10 0 0 1 0-20h1.2A12 12 0 0 1 40 24a8 8 0 0 1 0 12z" fill="#E2E8F0" stroke="#94A3B8" stroke-width="2"/></svg>`,
-  overcast:`<svg viewBox="0 0 52 52" width="36" height="36" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M40 30H16a10 10 0 0 1 0-20h1.2A12 12 0 0 1 40 18a8 8 0 0 1 0 12z" fill="#CBD5E1" stroke="#94A3B8" stroke-width="2"/><path d="M36 42H22a6 6 0 0 1 0-12h.8A7.5 7.5 0 0 1 36 36a4 4 0 0 1 0 6z" fill="#E2E8F0" stroke="#94A3B8" stroke-width="1.8"/></svg>`,
-  rain:`<svg viewBox="0 0 52 52" width="36" height="36" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M40 28H16a10 10 0 0 1 0-20h1.2A12 12 0 0 1 40 16a8 8 0 0 1 0 12z" fill="#CBD5E1" stroke="#94A3B8" stroke-width="2"/><g stroke="#378ADD" stroke-width="2.5"><line x1="17" y1="33" x2="14" y2="41"/><line x1="26" y1="33" x2="23" y2="41"/><line x1="35" y1="33" x2="32" y2="41"/></g></svg>`,
-  thunder:`<svg viewBox="0 0 52 52" width="36" height="36" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M38 26H16a9 9 0 0 1 0-18h1A11 11 0 0 1 38 16a7 7 0 0 1 0 10z" fill="#94A3B8" stroke="#64748B" stroke-width="2"/><path d="M28 28l-5 10h6l-5 10" stroke="#FCD34D" stroke-width="2.8" fill="none"/></svg>`,
-  fog:`<svg viewBox="0 0 52 52" width="36" height="36" fill="none" stroke-linecap="round" stroke-linejoin="round"><g stroke="#94A3B8" stroke-width="2.5"><path d="M8 18 Q18 14 28 18 Q38 22 44 18"/><path d="M6 26 Q16 22 26 26 Q36 30 46 26"/><path d="M8 34 Q18 30 28 34 Q38 38 44 34"/></g></svg>`
+  sun:`<svg viewBox="0 0 52 52" width="52" height="52" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="26" cy="26" r="10" fill="#FDE68A" stroke="#F59E0B" stroke-width="2.5"/><g stroke="#F59E0B" stroke-width="2.2"><line x1="26" y1="5" x2="26" y2="11"/><line x1="26" y1="41" x2="26" y2="47"/><line x1="5" y1="26" x2="11" y2="26"/><line x1="41" y1="26" x2="47" y2="26"/><line x1="10.5" y1="10.5" x2="14.5" y2="14.5"/><line x1="37.5" y1="37.5" x2="41.5" y2="41.5"/><line x1="41.5" y1="10.5" x2="37.5" y2="14.5"/><line x1="14.5" y1="37.5" x2="10.5" y2="41.5"/></g></svg>`,
+  partcloud:`<svg viewBox="0 0 52 52" width="52" height="52" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="20" cy="20" r="8" fill="#FDE68A" stroke="#F59E0B" stroke-width="2"/><g stroke="#F59E0B" stroke-width="1.8"><line x1="20" y1="7" x2="20" y2="11"/><line x1="20" y1="29" x2="20" y2="33"/><line x1="7" y1="20" x2="11" y2="20"/><line x1="29" y1="20" x2="33" y2="20"/><line x1="10.6" y1="10.6" x2="13.4" y2="13.4"/><line x1="26.6" y1="26.6" x2="29.4" y2="29.4"/><line x1="29.4" y1="10.6" x2="26.6" y2="13.4"/></g><path d="M39 42H23a7 7 0 0 1 0-14h.9A8.5 8.5 0 0 1 39 34a5 5 0 0 1 0 8z" fill="#E2E8F0" stroke="#94A3B8" stroke-width="2"/></svg>`,
+  cloud:`<svg viewBox="0 0 52 52" width="52" height="52" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M40 36H16a10 10 0 0 1 0-20h1.2A12 12 0 0 1 40 24a8 8 0 0 1 0 12z" fill="#E2E8F0" stroke="#94A3B8" stroke-width="2"/></svg>`,
+  overcast:`<svg viewBox="0 0 52 52" width="52" height="52" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M40 30H16a10 10 0 0 1 0-20h1.2A12 12 0 0 1 40 18a8 8 0 0 1 0 12z" fill="#CBD5E1" stroke="#94A3B8" stroke-width="2"/><path d="M36 42H22a6 6 0 0 1 0-12h.8A7.5 7.5 0 0 1 36 36a4 4 0 0 1 0 6z" fill="#E2E8F0" stroke="#94A3B8" stroke-width="1.8"/></svg>`,
+  rain:`<svg viewBox="0 0 52 52" width="52" height="52" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M40 28H16a10 10 0 0 1 0-20h1.2A12 12 0 0 1 40 16a8 8 0 0 1 0 12z" fill="#CBD5E1" stroke="#94A3B8" stroke-width="2"/><g stroke="#378ADD" stroke-width="2.5"><line x1="17" y1="33" x2="14" y2="41"/><line x1="26" y1="33" x2="23" y2="41"/><line x1="35" y1="33" x2="32" y2="41"/></g></svg>`,
+  thunder:`<svg viewBox="0 0 52 52" width="52" height="52" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M38 26H16a9 9 0 0 1 0-18h1A11 11 0 0 1 38 16a7 7 0 0 1 0 10z" fill="#94A3B8" stroke="#64748B" stroke-width="2"/><path d="M28 28l-5 10h6l-5 10" stroke="#FCD34D" stroke-width="2.8" fill="none"/></svg>`,
+  fog:`<svg viewBox="0 0 52 52" width="52" height="52" fill="none" stroke-linecap="round" stroke-linejoin="round"><g stroke="#94A3B8" stroke-width="2.5"><path d="M8 18 Q18 14 28 18 Q38 22 44 18"/><path d="M6 26 Q16 22 26 26 Q36 30 46 26"/><path d="M8 34 Q18 30 28 34 Q38 38 44 34"/></g></svg>`
 };
 
 function pickWxSvg(wx) {

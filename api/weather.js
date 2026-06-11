@@ -1,4 +1,6 @@
-const STATION_ID = 'C0S520'; // 汐止
+// 汐止氣象站：C0AH00（新北市汐止區，O-A0001-001）
+// 汐止雨量站：C0AH00（同站，O-A0002-001）
+const STATION_ID = 'C0AH00';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -10,47 +12,37 @@ export default async function handler(req, res) {
       fetch(`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=${token}&StationId=${STATION_ID}&format=JSON`),
       fetch(`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0002-001?Authorization=${token}&StationId=${STATION_ID}&format=JSON`)
     ]);
-
     const wxJson   = await wxRes.json();
     const rainJson = await rainRes.json();
 
-    // O-A0001-001 結構：records.Station[].WeatherElement 為物件（非陣列）
-    const wxSt  = wxJson?.records?.Station?.[0];
-    const wxEl  = wxSt?.WeatherElement || {};
-
-    // O-A0002-001 結構：records.Station[].RainfallElement.Precipitation 陣列
+    const wxSt   = wxJson?.records?.Station?.[0];
+    const wxEl   = wxSt?.WeatherElement || {};
     const rainSt = rainJson?.records?.Station?.[0];
     const precip = rainSt?.RainfallElement?.Precipitation || [];
 
-    // 找各時距雨量（Duration 欄位）
-    const findRain = (dur) => {
-      const hit = precip.find(p => p.Duration === dur);
-      return hit?.Accumulation != null ? +hit.Accumulation : null;
+    // Duration 值可能是 '12h' 或 '12hr'，兩種都試
+    const findRain = (...durs) => {
+      for (const dur of durs) {
+        const hit = precip.find(p => p.Duration === dur);
+        if (hit?.Accumulation != null) return +hit.Accumulation;
+      }
+      return null;
     };
 
-    // DailyExtreme 有時放在不同路徑，做保險處理
-    const tempMax = wxEl?.DailyExtreme?.DailyHigh?.AirTemperature != null
-      ? +wxEl.DailyExtreme.DailyHigh.AirTemperature : null;
-    const tempMin = wxEl?.DailyExtreme?.DailyLow?.AirTemperature != null
-      ? +wxEl.DailyExtreme.DailyLow.AirTemperature : null;
-
-    const result = {
+    res.status(200).json({
       stationName: wxSt?.StationName || '汐止',
       obsTime:     wxSt?.ObsTime?.DateTime || null,
-      weather:     wxEl?.Weather || null,
-      temperature: wxEl?.AirTemperature != null ? +wxEl.AirTemperature : null,
-      tempMax,
-      tempMin,
-      rain12h:  findRain('12hr'),
-      rain24h:  findRain('24hr'),
-      rain48h:  findRain('48hr'),
-      rainToday: findRain('today'),
-      // debug
-      _raw_wx_keys:   Object.keys(wxEl),
-      _raw_precip_dur: precip.map(p => p.Duration),
-    };
-
-    res.status(200).json(result);
+      weather:     wxEl?.Weather           || null,
+      temperature: wxEl?.AirTemperature    != null ? +wxEl.AirTemperature : null,
+      tempMax:     wxEl?.DailyExtreme?.DailyHigh?.AirTemperature != null
+                     ? +wxEl.DailyExtreme.DailyHigh.AirTemperature : null,
+      tempMin:     wxEl?.DailyExtreme?.DailyLow?.AirTemperature != null
+                     ? +wxEl.DailyExtreme.DailyLow.AirTemperature : null,
+      rain12h:  findRain('12h','12hr'),
+      rain24h:  findRain('24h','24hr'),
+      rain48h:  findRain('48h','48hr'),
+      rainToday: findRain('today','本日'),
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

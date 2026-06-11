@@ -351,19 +351,19 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
         </div>
       </div>
       <div class="ib-cell" style="flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;flex:1">
-        <div class="ib-lbl"><span class="ib-pulse"></span>&nbsp;觀測資料<span style="font-size:10px;color:var(--text3);margin-left:6px" id="ibWxTime"></span></div>
+        <div class="ib-lbl"><span class="ib-pulse"></span>&nbsp;累積雨量<span style="font-size:10px;color:var(--text3);margin-left:6px" id="ibWxTime"></span></div>
         <div class="rain-grid">
-          <div class="rpill low" id="ibPillRain">
-            <div class="rp-lbl">即時雨量</div>
-            <div style="display:flex;align-items:baseline;gap:3px"><span class="rp-val" id="ibPrecipNow">--</span><span class="rp-unit">mm</span></div>
+          <div class="rpill low" id="ibPill1h">
+            <div class="rp-lbl">1hr</div>
+            <div style="display:flex;align-items:baseline;gap:3px"><span class="rp-val" id="ibR1h">--</span><span class="rp-unit">mm</span></div>
           </div>
-          <div class="rpill" style="color:var(--text2)" id="ibPillHumid">
-            <div class="rp-lbl">相對濕度</div>
-            <div style="display:flex;align-items:baseline;gap:3px"><span class="rp-val" id="ibHumidity">--</span><span class="rp-unit">%</span></div>
+          <div class="rpill low" id="ibPill12h">
+            <div class="rp-lbl">12hr</div>
+            <div style="display:flex;align-items:baseline;gap:3px"><span class="rp-val" id="ibR12h">--</span><span class="rp-unit">mm</span></div>
           </div>
-          <div class="rpill" style="color:var(--text2)" id="ibPillPres">
-            <div class="rp-lbl">氣壓</div>
-            <div style="display:flex;align-items:baseline;gap:3px"><span class="rp-val" style="font-size:16px" id="ibPressure">--</span><span class="rp-unit">hPa</span></div>
+          <div class="rpill low" id="ibPill24h">
+            <div class="rp-lbl">24hr</div>
+            <div style="display:flex;align-items:baseline;gap:3px"><span class="rp-val" id="ibR24h">--</span><span class="rp-unit">mm</span></div>
           </div>
         </div>
       </div>
@@ -625,19 +625,23 @@ function applyWeatherToBar(d) {
     const el = document.getElementById('ibWxTime');
     if (el) el.textContent = `更新 ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`;
   }
-  // 即時雨量
-  const rc = v => v==null?'low': +v>=20?'high': +v>=5?'mid':'low';
-  const pnEl = document.getElementById('ibPrecipNow');
-  const pnPill = document.getElementById('ibPillRain');
-  const pnVal = d.precipNow != null ? d.precipNow : null;
-  if (pnEl) pnEl.textContent = pnVal != null ? pnVal.toFixed(1) : '--';
-  if (pnPill) pnPill.className = 'rpill ' + rc(pnVal);
-  // 相對濕度
-  const hmEl = document.getElementById('ibHumidity');
-  if (hmEl) hmEl.textContent = d.humidity != null ? Math.round(d.humidity) : '--';
-  // 氣壓（從 wx_el 傳過來）
-  const prEl = document.getElementById('ibPressure');
-  if (prEl) prEl.textContent = d.pressure != null ? d.pressure.toFixed(1) : '--';
+  // 累積雨量 pills
+  const rc = v => v==null?'low': +v>=50?'high': +v>=15?'mid':'low';
+  const setR = (vi, pi, val) => {
+    const n = val != null ? +val : null;
+    const vEl = document.getElementById(vi); const pEl = document.getElementById(pi);
+    if (vEl) vEl.textContent = n != null ? n.toFixed(1) : '--';
+    if (pEl) pEl.className = 'rpill ' + rc(n);
+  };
+  setR('ibR1h','ibPill1h', d.rain1h);
+  setR('ibR12h','ibPill12h', d.rain12h);
+  setR('ibR24h','ibPill24h', d.rain24h);
+  // 即時雨量顯示在天氣描述下方
+  const precipNowEl = document.getElementById('ibPrecipNow');
+  if (precipNowEl) {
+    precipNowEl.textContent = d.precipNow != null && d.precipNow > 0
+      ? '即時 ' + d.precipNow.toFixed(1) + ' mm' : '';
+  }
 }
 
 function startClock() {

@@ -342,6 +342,7 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
           <div class="wx-svg" id="ibWxIcon"><i class="ti ti-cloud" style="font-size:44px;color:var(--text3)" aria-hidden="true"></i></div>
           <div>
             <div class="wx-desc" id="ibWxDesc"><span class="ib-loading">天氣載入中…</span></div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:2px" id="ibPrecipNow"></div>
             <div class="wx-temp-row">
               <span class="wx-cur" id="ibWxTemp"></span>
               <span class="wx-range" id="ibWxRange"></span>
@@ -634,6 +635,11 @@ function applyWeatherToBar(d) {
   setRain('ibR12','ibPill12', d.rain12h);
   setRain('ibR24','ibPill24', d.rain24h);
   setRain('ibR48','ibPill48', d.rain48h);
+  // 即時降水量顯示在天氣描述旁
+  const precipEl = document.getElementById('ibPrecipNow');
+  if (precipEl) {
+    precipEl.textContent = d.precipNow != null ? '即時雨量 ' + d.precipNow.toFixed(1) + ' mm/10min' : '';
+  }
 }
 
 function startClock() {

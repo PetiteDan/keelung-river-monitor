@@ -347,14 +347,11 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
               <span class="wx-cur" id="ibWxTemp"></span>
               <span class="wx-range" id="ibWxRange"></span>
             </div>
-            <div style="display:flex;gap:12px;margin-top:3px">
-              <span style="font-size:13px;color:var(--text3)">濕度 <span style="color:var(--text2);font-weight:500" id="ibHumidity">--</span> %</span>
-              <span style="font-size:13px;color:var(--text3)">氣壓 <span style="color:var(--text2);font-weight:500" id="ibPressure">--</span> hPa</span>
-            </div>
+
           </div>
         </div>
       </div>
-      <div class="ib-cell" style="flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;flex:1">
+      <div class="ib-cell" style="flex-direction:column;align-items:flex-start;justify-content:center;gap:4px">
         <div class="ib-lbl"><span class="ib-pulse"></span>&nbsp;累積雨量<span style="font-size:10px;color:var(--text3);margin-left:6px" id="ibWxTime"></span></div>
         <div class="rain-grid">
           <div class="rpill low" id="ibPill1h">
@@ -368,6 +365,20 @@ header h1 { font-size: 17px; font-weight: 500; flex: 1; }
           <div class="rpill low" id="ibPill24h">
             <div class="rp-lbl">24hr</div>
             <div style="display:flex;align-items:baseline;gap:3px"><span class="rp-val" id="ibR24h">--</span><span class="rp-unit">mm</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="ib-cell" style="flex-direction:column;align-items:flex-start;justify-content:center;gap:10px;flex:1;border-left:0.5px solid var(--border)">
+        <div class="ib-lbl"><i class="ti ti-droplet" style="font-size:12px" aria-hidden="true"></i>相對濕度 ／ 氣壓</div>
+        <div style="display:flex;gap:16px;align-items:flex-end">
+          <div>
+            <div style="font-size:28px;font-weight:500;color:var(--text);line-height:1" id="ibHumidity">--</div>
+            <div style="font-size:13px;color:var(--text3);margin-top:3px">%</div>
+          </div>
+          <div style="width:0.5px;height:40px;background:var(--border);flex-shrink:0"></div>
+          <div>
+            <div style="font-size:22px;font-weight:500;color:var(--text);line-height:1" id="ibPressure">--</div>
+            <div style="font-size:13px;color:var(--text3);margin-top:3px">hPa</div>
           </div>
         </div>
       </div>

@@ -5,11 +5,11 @@ const TAMSUI_STATIONS = [
   { StationNo:'1140H508', StationName:'暖江橋',     river:'基隆河', region:'基隆暖暖' },
   { StationNo:'1140H110', StationName:'介壽橋',     river:'基隆河', region:'新北瑞芳' },
   { StationNo:'1140H999', StationName:'員山子', river:'基隆河', region:'新北瑞芳' },
-  { StationNo:'1140H501', StationName:'大宜橋',     river:'基隆河', region:'基隆七堵' },
+  { StationNo:'1140H501', StationName:'大直橋',     river:'基隆河', region:'基隆七堵' },
   { StationNo:'1140H503', StationName:'大華橋',     river:'基隆河', region:'基隆七堵' },
   { StationNo:'1140H507', StationName:'江北橋',     river:'基隆河', region:'新北汐止' },
   { StationNo:'1140H504', StationName:'社后橋',     river:'基隆河', region:'新北汐止' },
-  { StationNo:'1140H502', StationName:'長安橋',     river:'基隆河', region:'新北汐止' },
+  { StationNo:'1140H502', StationName:'五堵',     river:'基隆河', region:'新北汐止' },
   { StationNo:'1140H505', StationName:'南湖大橋',   river:'基隆河', region:'台北南港' },
   { StationNo:'1140H506', StationName:'百齡橋',     river:'基隆河', region:'台北中山' },
   // 淡水河幹流

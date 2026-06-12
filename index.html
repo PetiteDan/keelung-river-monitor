@@ -534,20 +534,12 @@ async function loadData() {
     mData.forEach(m => { newMeta[m.StationNo] = m; });
     rData.forEach(r => { newRt[r.StationNo] = r; });
 
-    // Rebuild stations array from meta keys (keep existing order if already set)
-    if (stations.length === 0) {
-      stations = mData.map(m => ({
-        id: m.StationNo,
-        name: m.StationName || m.StationNo,
-        region: m.Address ? m.Address.slice(0,5) : ''
-      }));
-    } else {
-      // Update name/region but keep order
-      stations = stations.map(s => {
-        const m = newMeta[s.id];
-        return m ? { id: s.id, name: m.StationName || s.name, region: s.region } : s;
-      });
-    }
+    // 每次都從 API 回傳重建（Station API 已按 Edge Config 順序回傳）
+    stations = mData.map(m => ({
+      id: m.StationNo,
+      name: m.StationName || m.StationNo,
+      region: m.Address ? m.Address.slice(0,5) : ''
+    }));
 
     meta = newMeta;
     rt = newRt;

@@ -13,10 +13,15 @@ export default async function handler(req, res) {
   if (!token) return res.status(500).json({ error: '尚未設定 CWA_API_KEY' });
 
   const toNum = v => {
-    if (v == null || v === 'X') return null;
-    if (v === 'T') return 0;   // 雨跡 → 0
+    if (v == null || v === 'X' || v === '' || v === '-') return null;
+    if (v === 'T') return 0;
     const n = +v;
     return (isNaN(n) || n <= -98) ? null : n;
+  };
+  const toStr = v => {
+    if (v == null || v === '' || v === '-') return null;
+    if (String(v).trim() === '-99' || String(v).trim() === '-9999') return null;
+    return String(v).trim() || null;
   };
 
   try {
@@ -39,7 +44,7 @@ export default async function handler(req, res) {
     res.status(200).json({
       stationName: wxSt?.StationName || '汐止',
       obsTime:     wxSt?.ObsTime?.DateTime || null,
-      weather:     wxEl.Weather     || null,
+      weather:     toStr(wxEl.Weather),
       temperature: toNum(wxEl.AirTemperature),
       tempMax:     toNum(wxEl.DailyExtreme?.DailyHigh?.TemperatureInfo?.AirTemperature),
       tempMin:     toNum(wxEl.DailyExtreme?.DailyLow?.TemperatureInfo?.AirTemperature),

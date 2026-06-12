@@ -27,7 +27,7 @@ export default async function handler(req, res) {
       // 汐止觀測站（溫濕壓、即時降水）
       fetch(`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=${token}&StationId=${XIZHI_STATION}&format=JSON`),
       // 新北市汐止區鄉鎮預報（天氣現象）
-      fetch(`https://opendata.cwa.gov.tw/api/v1/rest/datastore/${FORECAST_API}?Authorization=${token}&locationName=汐止區&elementName=Wx&format=JSON`),
+      fetch(`https://opendata.cwa.gov.tw/api/v1/rest/datastore/${FORECAST_API}?Authorization=${token}&locationName=汐止區&elementName=天氣現象&format=JSON`),
       // 雨量
       fetch(`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0002-001?Authorization=${token}&StationId=${XIZHI_STATION}&format=JSON`)
     ]);
@@ -45,18 +45,16 @@ export default async function handler(req, res) {
     try {
       const locations = forecastJson?.records?.Locations?.[0]?.Location || [];
       const xizhi     = locations.find(l => l.LocationName === '汐止區') || locations[0];
-      const wxElem    = xizhi?.WeatherElement?.find(e => e.ElementName === 'Wx');
-      const now       = new Date();
-      // 找目前時間對應的時段（第一筆通常是最近的）
-      const periods   = wxElem?.Time || [];
-      const current   = periods.find(t => {
+      // 元素名稱是「天氣現象」，值在 ElementValue[0].Weather
+      const wxElem  = xizhi?.WeatherElement?.find(e => e.ElementName === '天氣現象');
+      const now     = new Date();
+      const periods = wxElem?.Time || [];
+      const current = periods.find(t => {
         const start = new Date(t.StartTime);
         const end   = new Date(t.EndTime);
         return now >= start && now < end;
       }) || periods[0];
-      const wxDesc = current?.ElementValue?.[0]?.Value || current?.ElementValue?.[0]?.WeatherDescription;
-      // WeatherDescription 格式是「晴時多雲。。。降雨機率：10%」，只取開頭的天氣現象
-      weather = toStr(wxDesc?.split('。')[0]?.split('，')[0]);
+      weather = toStr(current?.ElementValue?.[0]?.Weather);
     } catch (_) {}
 
     // 雨量

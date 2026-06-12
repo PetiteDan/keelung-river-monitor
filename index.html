@@ -525,7 +525,12 @@ function fmtCountdown(s) {
 // ── Data loading ──
 async function loadData() {
   try {
-    const [mRes, rRes] = await Promise.all([fetch('/api/station'), fetch('/api/realtime')]);
+    // 優先使用本地快取的站點清單（管理員儲存時會同步更新）
+    const cachedIds = localStorage.getItem('station_ids');
+    const stationUrl  = cachedIds ? `/api/station?ids=${encodeURIComponent(cachedIds)}`  : '/api/station';
+    const realtimeUrl = cachedIds ? `/api/realtime?ids=${encodeURIComponent(cachedIds)}` : '/api/realtime';
+
+    const [mRes, rRes] = await Promise.all([fetch(stationUrl), fetch(realtimeUrl)]);
     const mData = await mRes.json();
     const rData = await rRes.json();
 
@@ -1126,7 +1131,8 @@ async function saveStations() {
     const d = await res.json();
     if (res.ok) {
       closeModal('adminModal');
-      // 清空所有快取，讓 loadData() 完全重新從 API 抓取（包含 Edge Config 最新清單）
+      // 同步更新 localStorage，確保重整後立即生效
+      localStorage.setItem('station_ids', pendingIds.join(','));
       stations = []; meta = {}; rt = {}; hist = {};
       if (sel >= pendingIds.length) sel = 0;
       await loadData();

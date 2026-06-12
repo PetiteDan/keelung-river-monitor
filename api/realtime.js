@@ -36,7 +36,14 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 'no-store');
   try {
-    const ids = await getIdsFromEdgeConfig();
+    // ?ids= 參數優先（前端 localStorage 快取的值），沒有才讀 Edge Config
+    let ids;
+    const idsParam = req.query?.ids;
+    if (idsParam && idsParam.trim()) {
+      ids = idsParam.split(',').map(s => s.trim()).filter(Boolean);
+    } else {
+      ids = await getIdsFromEdgeConfig();
+    }
     const response = await fetch('https://fhy.wra.gov.tw/WraApi/v1/Water/RealTimeInfo');
     const data = await response.json();
     const filtered = data.filter(s => ids.includes(s.StationNo));

@@ -1,8 +1,8 @@
 // C0AH00：汐止自動站（溫度、濕度、氣壓、即時降水）
-// 466880：板橋有人站（天氣現象描述，自動站無此欄位）
+// F-D0047-029：新北市鄉鎮天氣預報，汐止區（天氣現象描述，最準確）
 // C0AH00：雨量（O-A0002-001）
-const XIZHI_ID   = 'C0AH00';
-const BANQIAO_ID = '466880';
+const XIZHI_STATION = 'C0AH00';
+const FORECAST_API  = 'F-D0047-029'; // 新北市各區預報
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   if (!token) return res.status(500).json({ error: '尚未設定 CWA_API_KEY' });
 
   const toNum = v => {
-    if (v == null || v === 'X' || v === '' || v === '-') return null;
+    if (v == null || v === 'X' || v === '') return null;
     if (v === 'T') return 0;
     const n = +v;
     return (isNaN(n) || n <= -98) ? null : n;
@@ -19,45 +19,60 @@ export default async function handler(req, res) {
   const toStr = v => {
     if (!v) return null;
     const s = String(v).trim();
-    if (!s || s === '-99' || s === '-9999' || s === 'X' || s === '-') return null;
-    return s;
+    return (s === '-99' || s === '-9999' || s === 'X' || s === '-' || s === '') ? null : s;
   };
 
   try {
-    const [xRes, bqRes, rainRes] = await Promise.all([
-      // 汐止站：溫度、濕度、氣壓、即時降水
-      fetch(`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=${token}&StationId=${XIZHI_ID}&format=JSON`),
-      // 板橋站：天氣現象描述
-      fetch(`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=${token}&StationId=${BANQIAO_ID}&format=JSON`),
+    const [obsRes, forecastRes, rainRes] = await Promise.all([
+      // 汐止觀測站（溫濕壓、即時降水）
+      fetch(`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=${token}&StationId=${XIZHI_STATION}&format=JSON`),
+      // 新北市汐止區鄉鎮預報（天氣現象）
+      fetch(`https://opendata.cwa.gov.tw/api/v1/rest/datastore/${FORECAST_API}?Authorization=${token}&locationName=汐止區&elementName=Wx&format=JSON`),
       // 雨量
-      fetch(`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0002-001?Authorization=${token}&StationId=${XIZHI_ID}&format=JSON`)
+      fetch(`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0002-001?Authorization=${token}&StationId=${XIZHI_STATION}&format=JSON`)
     ]);
 
-    const xJson    = await xRes.json();
-    const bqJson   = await bqRes.json();
-    const rainJson = await rainRes.json();
+    const obsJson      = await obsRes.json();
+    const forecastJson = await forecastRes.json();
+    const rainJson     = await rainRes.json();
 
-    const xSt  = xJson?.records?.Station?.[0];
-    const xEl  = xSt?.WeatherElement || {};
-    const bqSt = bqJson?.records?.Station?.[0];
-    const bqEl = bqSt?.WeatherElement || {};
+    // 觀測站資料
+    const obsSt = obsJson?.records?.Station?.[0];
+    const obsEl = obsSt?.WeatherElement || {};
 
-    // 天氣描述：優先汐止，沒有就用板橋（板橋有人工觀測）
-    const weather = toStr(xEl.Weather) || toStr(bqEl.Weather);
+    // 預報天氣現象：取最近一筆時段的 Wx 描述
+    let weather = null;
+    try {
+      const locations = forecastJson?.records?.Locations?.[0]?.Location || [];
+      const xizhi     = locations.find(l => l.LocationName === '汐止區') || locations[0];
+      const wxElem    = xizhi?.WeatherElement?.find(e => e.ElementName === 'Wx');
+      const now       = new Date();
+      // 找目前時間對應的時段（第一筆通常是最近的）
+      const periods   = wxElem?.Time || [];
+      const current   = periods.find(t => {
+        const start = new Date(t.StartTime);
+        const end   = new Date(t.EndTime);
+        return now >= start && now < end;
+      }) || periods[0];
+      const wxDesc = current?.ElementValue?.[0]?.Value || current?.ElementValue?.[0]?.WeatherDescription;
+      // WeatherDescription 格式是「晴時多雲。。。降雨機率：10%」，只取開頭的天氣現象
+      weather = toStr(wxDesc?.split('。')[0]?.split('，')[0]);
+    } catch (_) {}
 
+    // 雨量
     const rainSt = rainJson?.records?.Station?.[0];
     const rainEl = rainSt?.RainfallElement || {};
 
     res.status(200).json({
-      stationName: xSt?.StationName || '汐止',
-      obsTime:     xSt?.ObsTime?.DateTime || null,
+      stationName: obsSt?.StationName || '汐止',
+      obsTime:     obsSt?.ObsTime?.DateTime || null,
       weather,
-      temperature: toNum(xEl.AirTemperature),
-      tempMax:     toNum(xEl.DailyExtreme?.DailyHigh?.TemperatureInfo?.AirTemperature),
-      tempMin:     toNum(xEl.DailyExtreme?.DailyLow?.TemperatureInfo?.AirTemperature),
-      humidity:    toNum(xEl.RelativeHumidity),
-      pressure:    toNum(xEl.AirPressure),
-      precipNow:   toNum(xEl.Now?.Precipitation),
+      temperature: toNum(obsEl.AirTemperature),
+      tempMax:     toNum(obsEl.DailyExtreme?.DailyHigh?.TemperatureInfo?.AirTemperature),
+      tempMin:     toNum(obsEl.DailyExtreme?.DailyLow?.TemperatureInfo?.AirTemperature),
+      humidity:    toNum(obsEl.RelativeHumidity),
+      pressure:    toNum(obsEl.AirPressure),
+      precipNow:   toNum(obsEl.Now?.Precipitation),
       rain1h:      toNum(rainEl.Past1hr?.Precipitation),
       rain12h:     toNum(rainEl.Past12hr?.Precipitation),
       rain24h:     toNum(rainEl.Past24hr?.Precipitation),

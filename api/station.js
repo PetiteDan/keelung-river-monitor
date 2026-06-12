@@ -16,22 +16,28 @@ const STATION_FALLBACK = {
 };
 
 async function getIdsFromEdgeConfig() {
-  // 優先用 REST API 直讀（繞過 SDK 快取，確保取到最新值）
+  // 同時用 REST API 和 SDK，取最新的那個
   const ecId    = process.env.EDGE_CONFIG_ID;
   const ecToken = process.env.VERCEL_TOKEN;
+
+  let restIds = null;
   if (ecId && ecToken) {
     try {
       const r = await fetch(
         `https://api.vercel.com/v1/edge-config/${ecId}/item/station_ids`,
-        { headers: { Authorization: `Bearer ${ecToken}` } }
+        {
+          headers: { Authorization: `Bearer ${ecToken}` },
+          cache: 'no-store'
+        }
       );
       if (r.ok) {
         const j = await r.json();
-        if (Array.isArray(j.value) && j.value.length > 0) return j.value;
+        if (Array.isArray(j.value) && j.value.length > 0) restIds = j.value;
       }
     } catch (_) {}
   }
-  // Fallback: SDK（有快取但至少不會出錯）
+  if (restIds) return restIds;
+
   try {
     const saved = await get('station_ids');
     if (Array.isArray(saved) && saved.length > 0) return saved;

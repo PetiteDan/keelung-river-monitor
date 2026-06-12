@@ -656,7 +656,7 @@ function applyWeatherToBar(d) {
   const iconEl = document.getElementById('ibWxIcon');
   if (iconEl) iconEl.innerHTML = pickWxSvg(d.weather);
   const descEl = document.getElementById('ibWxDesc');
-  if (descEl) descEl.textContent = d.weather || '--';
+  if (descEl) descEl.textContent = d.weather || '觀測中';
   const tempEl = document.getElementById('ibWxTemp');
   if (tempEl) tempEl.textContent = d.temperature != null ? d.temperature.toFixed(1)+'°C' : '--';
   const rangeEl = document.getElementById('ibWxRange');

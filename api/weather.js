@@ -1,14 +1,12 @@
-const WX_STATION = 'C0AH00';  // 汐止自動氣象站（O-A0001-001）
-// O-A0002-001 路徑（從官方文件確認）：
-//   RainfallElement.Now.Precipitation        → 當日降水量
-//   RainfallElement.Past10Min.Precipitation  → 過去10分鐘
-//   RainfallElement.Past1hr.Precipitation    → 過去1小時
-//   RainfallElement.Past12hr.Precipitation   → 過去12小時
-//   RainfallElement.Past24hr.Precipitation   → 過去24小時
-//   RainfallElement.Past2days.Precipitation  → 前1日至今
+// C0AH00：汐止自動站（溫度、濕度、氣壓、即時降水）
+// 466880：板橋有人站（天氣現象描述，自動站無此欄位）
+// C0AH00：雨量（O-A0002-001）
+const XIZHI_ID   = 'C0AH00';
+const BANQIAO_ID = '466880';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cache-Control', 'no-store');
   const token = process.env.CWA_API_KEY;
   if (!token) return res.status(500).json({ error: '尚未設定 CWA_API_KEY' });
 
@@ -19,38 +17,47 @@ export default async function handler(req, res) {
     return (isNaN(n) || n <= -98) ? null : n;
   };
   const toStr = v => {
-    if (v == null || v === '' || v === '-') return null;
-    if (String(v).trim() === '-99' || String(v).trim() === '-9999') return null;
-    return String(v).trim() || null;
+    if (!v) return null;
+    const s = String(v).trim();
+    if (!s || s === '-99' || s === '-9999' || s === 'X' || s === '-') return null;
+    return s;
   };
 
   try {
-    const [wxRes, rainRes] = await Promise.all([
-      fetch(`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=${token}&StationId=${WX_STATION}&format=JSON`),
-      fetch(`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0002-001?Authorization=${token}&StationId=${WX_STATION}&format=JSON`)
+    const [xRes, bqRes, rainRes] = await Promise.all([
+      // 汐止站：溫度、濕度、氣壓、即時降水
+      fetch(`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=${token}&StationId=${XIZHI_ID}&format=JSON`),
+      // 板橋站：天氣現象描述
+      fetch(`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=${token}&StationId=${BANQIAO_ID}&format=JSON`),
+      // 雨量
+      fetch(`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0002-001?Authorization=${token}&StationId=${XIZHI_ID}&format=JSON`)
     ]);
 
-    const wxJson   = await wxRes.json();
+    const xJson    = await xRes.json();
+    const bqJson   = await bqRes.json();
     const rainJson = await rainRes.json();
 
-    // ── 氣象站 ──
-    const wxSt = wxJson?.records?.Station?.[0];
-    const wxEl = wxSt?.WeatherElement || {};
+    const xSt  = xJson?.records?.Station?.[0];
+    const xEl  = xSt?.WeatherElement || {};
+    const bqSt = bqJson?.records?.Station?.[0];
+    const bqEl = bqSt?.WeatherElement || {};
 
-    // ── 雨量站（正確路徑）──
-    const rainSt  = rainJson?.records?.Station?.[0];
-    const rainEl  = rainSt?.RainfallElement || {};
+    // 天氣描述：優先汐止，沒有就用板橋（板橋有人工觀測）
+    const weather = toStr(xEl.Weather) || toStr(bqEl.Weather);
+
+    const rainSt = rainJson?.records?.Station?.[0];
+    const rainEl = rainSt?.RainfallElement || {};
 
     res.status(200).json({
-      stationName: wxSt?.StationName || '汐止',
-      obsTime:     wxSt?.ObsTime?.DateTime || null,
-      weather:     toStr(wxEl.Weather),
-      temperature: toNum(wxEl.AirTemperature),
-      tempMax:     toNum(wxEl.DailyExtreme?.DailyHigh?.TemperatureInfo?.AirTemperature),
-      tempMin:     toNum(wxEl.DailyExtreme?.DailyLow?.TemperatureInfo?.AirTemperature),
-      humidity:    toNum(wxEl.RelativeHumidity),
-      pressure:    toNum(wxEl.AirPressure),
-      precipNow:   toNum(wxEl.Now?.Precipitation),
+      stationName: xSt?.StationName || '汐止',
+      obsTime:     xSt?.ObsTime?.DateTime || null,
+      weather,
+      temperature: toNum(xEl.AirTemperature),
+      tempMax:     toNum(xEl.DailyExtreme?.DailyHigh?.TemperatureInfo?.AirTemperature),
+      tempMin:     toNum(xEl.DailyExtreme?.DailyLow?.TemperatureInfo?.AirTemperature),
+      humidity:    toNum(xEl.RelativeHumidity),
+      pressure:    toNum(xEl.AirPressure),
+      precipNow:   toNum(xEl.Now?.Precipitation),
       rain1h:      toNum(rainEl.Past1hr?.Precipitation),
       rain12h:     toNum(rainEl.Past12hr?.Precipitation),
       rain24h:     toNum(rainEl.Past24hr?.Precipitation),

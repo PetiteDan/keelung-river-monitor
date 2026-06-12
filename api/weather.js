@@ -2,7 +2,7 @@
 // F-D0047-029：新北市鄉鎮天氣預報，汐止區（天氣現象描述，最準確）
 // C0AH00：雨量（O-A0002-001）
 const XIZHI_STATION = 'C0AH00';
-const FORECAST_API  = 'F-D0047-029'; // 新北市各區預報
+const FORECAST_API  = 'F-D0047-071'; // 新北市各區預報
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');

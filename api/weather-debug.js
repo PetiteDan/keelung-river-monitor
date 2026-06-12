@@ -5,7 +5,7 @@ export default async function handler(req, res) {
 
   try {
     const r = await fetch(
-      `https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-029?Authorization=${token}&locationName=汐止區&elementName=Wx&format=JSON`
+      `https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-071?Authorization=${token}&locationName=汐止區&elementName=Wx&format=JSON`
     );
     const j = await r.json();
     // 回傳原始結構前三層

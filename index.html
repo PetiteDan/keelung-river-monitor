@@ -539,7 +539,7 @@ async function loadData() {
     mData.forEach(m => { newMeta[m.StationNo] = m; });
     rData.forEach(r => { newRt[r.StationNo] = r; });
 
-    // 每次都從 API 回傳重建（Station API 已按 Edge Config 順序回傳）
+    // 從 API 回傳重建 stations
     stations = mData.map(m => ({
       id: m.StationNo,
       name: m.StationName || m.StationNo,
@@ -548,6 +548,11 @@ async function loadData() {
 
     meta = newMeta;
     rt = newRt;
+
+    // 同步 localStorage（讓下次載入用快取加速）
+    if (stations.length > 0) {
+      localStorage.setItem('station_ids', stations.map(s => s.id).join(','));
+    }
 
     await loadHist();
     render();
@@ -1131,11 +1136,13 @@ async function saveStations() {
     const d = await res.json();
     if (res.ok) {
       closeModal('adminModal');
-      // 同步更新 localStorage，確保重整後立即生效
-      localStorage.setItem('station_ids', pendingIds.join(','));
+      // 儲存成功後清除 localStorage，強制下次從 Turso 重新讀取最新清單
+      localStorage.removeItem('station_ids');
       stations = []; meta = {}; rt = {}; hist = {};
       if (sel >= pendingIds.length) sel = 0;
       await loadData();
+      // loadData 完成後把新的 ids 存入 localStorage 加速後續讀取
+      localStorage.setItem('station_ids', stations.map(s => s.id).join(','));
     } else {
       document.getElementById('adminErr').textContent = d.error || '儲存失敗';
     }

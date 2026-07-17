@@ -8,46 +8,31 @@ export default async function handler(req, res) {
   const ids = await getStationIds();
   const results = {};
 
-  // 測試多個 API 端點
   const endpoints = [
-    {
-      name: 'opendata_wra_json',
-      url: 'https://opendata.wra.gov.tw/Service/OpenData.aspx?format=json&id=25768',
-    },
-    {
-      name: 'ntpc_e_all',
-      url: 'https://e.ntpc.gov.tw/api/v1/waterLevelStations',
-    },
-    {
-      name: 'ntpc_e_single',
-      url: 'https://e.ntpc.gov.tw/api/v1/waterLevelStations/1140H120',
-    },
-    {
-      name: 'ntpc_data_water',
-      url: 'https://data.ntpc.gov.tw/api/datasets/9c5ef699-60e6-4a6a-9843-a3c39c0ef81c/json?page=0&size=5',
-    },
-    {
-      name: 'fhy_wra_v1',
-      url: 'https://fhy.wra.gov.tw/WraApi/v1/Water/RealTimeInfo',
-    },
+    // opendata.wra.gov.tw 新路徑
+    { name: 'opendata_v1_water', url: 'https://opendata.wra.gov.tw/api/v1/WaterLevel/RealTimeInfo' },
+    { name: 'opendata_v2_water', url: 'https://opendata.wra.gov.tw/api/v2/WaterLevel/RealTimeInfo' },
+    { name: 'opendata_opendata_25768', url: 'https://opendata.wra.gov.tw/api/OpenData/25768?format=json' },
+    { name: 'opendata_dataset_25768', url: 'https://opendata.wra.gov.tw/api/v1/dataset/25768?format=json' },
+    // fhy v2
+    { name: 'fhy_v2_water', url: 'https://fhy.wra.gov.tw/Api/v2/Water/RealTimeInfo' },
+    // 直接下載 CSV 試試
+    { name: 'opendata_csv_25768', url: 'https://opendata.wra.gov.tw/Service/OpenData.aspx?format=csv&id=25768' },
   ];
 
   for (const ep of endpoints) {
     try {
       const r = await fetch(ep.url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-          'Accept': 'application/json, text/plain, */*',
-          'Referer': 'https://e.ntpc.gov.tw/',
-        },
-        signal: AbortSignal.timeout(6000),
+        headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': '*/*' },
+        signal: AbortSignal.timeout(5000),
       });
       const text = await r.text();
       const isJson = text.trim().startsWith('[') || text.trim().startsWith('{');
       results[ep.name] = {
         http: r.status,
         isJson,
-        preview: text.slice(0, 200),
+        len: text.length,
+        preview: text.slice(0, 150),
       };
     } catch(e) {
       results[ep.name] = { error: e.message };

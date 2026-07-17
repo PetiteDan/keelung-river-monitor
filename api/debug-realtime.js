@@ -5,39 +5,54 @@ export default async function handler(req, res) {
   const pw = req.query?.password;
   if (pw !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: '需要密碼' });
 
-  try {
-    const ids = await getStationIds();
+  const ids = await getStationIds();
+  const results = {};
 
-    // 測試兩個 API
-    const [r1, r2] = await Promise.all([
-      fetch('https://opendata.wra.gov.tw/Service/OpenData.aspx?format=json&id=25768'),
-      fetch('https://fhy.wra.gov.tw/WraApi/v1/Water/RealTimeInfo')
-    ]);
+  // 測試多個 API 端點
+  const endpoints = [
+    {
+      name: 'opendata_wra_json',
+      url: 'https://opendata.wra.gov.tw/Service/OpenData.aspx?format=json&id=25768',
+    },
+    {
+      name: 'ntpc_e_all',
+      url: 'https://e.ntpc.gov.tw/api/v1/waterLevelStations',
+    },
+    {
+      name: 'ntpc_e_single',
+      url: 'https://e.ntpc.gov.tw/api/v1/waterLevelStations/1140H120',
+    },
+    {
+      name: 'ntpc_data_water',
+      url: 'https://data.ntpc.gov.tw/api/datasets/9c5ef699-60e6-4a6a-9843-a3c39c0ef81c/json?page=0&size=5',
+    },
+    {
+      name: 'fhy_wra_v1',
+      url: 'https://fhy.wra.gov.tw/WraApi/v1/Water/RealTimeInfo',
+    },
+  ];
 
-    const d1 = await r1.json();
-    const d2 = await r2.json();
-
-    // 用 ids 過濾兩個來源
-    const from_opendata = d1.filter(r => ids.includes(r.stationid))
-      .map(r => ({ id: r.stationid, wl: r.waterlevel, time: r.datetime }));
-
-    const from_wra = d2.filter(r => ids.includes(r.StationNo))
-      .map(r => ({ id: r.StationNo, wl: r.WaterLevel, time: r.Time }));
-
-    // 也看 1140H5xx 是否還在某處
-    const old_ids = ['1140H507','1140H504','1140H502'];
-    const old_from_wra = d2.filter(r => old_ids.includes(r.StationNo))
-      .map(r => ({ id: r.StationNo, wl: r.WaterLevel, time: r.Time }));
-
-    res.status(200).json({
-      turso_ids: ids,
-      opendata_http: r1.status,
-      wra_http: r2.status,
-      matched_from_opendata: from_opendata,
-      matched_from_wra: matched_from_wra,
-      old_ids_from_wra: old_from_wra,
-    });
-  } catch(e) {
-    res.status(500).json({ error: e.message, stack: e.stack });
+  for (const ep of endpoints) {
+    try {
+      const r = await fetch(ep.url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          'Accept': 'application/json, text/plain, */*',
+          'Referer': 'https://e.ntpc.gov.tw/',
+        },
+        signal: AbortSignal.timeout(6000),
+      });
+      const text = await r.text();
+      const isJson = text.trim().startsWith('[') || text.trim().startsWith('{');
+      results[ep.name] = {
+        http: r.status,
+        isJson,
+        preview: text.slice(0, 200),
+      };
+    } catch(e) {
+      results[ep.name] = { error: e.message };
+    }
   }
+
+  res.status(200).json({ turso_ids: ids, results });
 }

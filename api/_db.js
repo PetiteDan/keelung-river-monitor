@@ -29,7 +29,7 @@ export async function initDb() {
   if (existing.rows.length === 0) {
     await db.execute(
       'INSERT INTO station_config (key, value) VALUES (?, ?)',
-      ['station_ids', JSON.stringify(['1140H507', '1140H504', '1140H502'])]
+      ['station_ids', JSON.stringify(['1140H120', '1140H115', '1140H113'])]
     );
   }
 }
@@ -46,7 +46,7 @@ export async function getStationIds() {
       if (Array.isArray(ids) && ids.length > 0) return ids;
     }
   } catch (_) {}
-  return ['1140H507', '1140H504', '1140H502'];
+  return ['1140H120', '1140H115', '1140H113'];
 }
 
 export async function setStationIds(ids) {

@@ -1,16 +1,15 @@
 import { initDb, getStationIds } from './_db.js';
 
+// 正確站號（傳統水文站，與防災資訊服務網資料一致）
 const STATION_FALLBACK = {
-  '1140H999': { StationNo:'1140H999', StationName:'員山子',   Address:'新北市瑞芳區', WarningLevel1:63.0, WarningLevel2:62.5, TopLevel:67.2 },
-  '1140H501': { StationNo:'1140H501', StationName:'大直橋',   Address:'基隆市七堵區' },
-  '1140H502': { StationNo:'1140H502', StationName:'五堵',     Address:'新北市汐止區' },
-  '1140H503': { StationNo:'1140H503', StationName:'大華橋',   Address:'基隆市七堵區' },
-  '1140H504': { StationNo:'1140H504', StationName:'社后橋',   Address:'新北市汐止區' },
-  '1140H505': { StationNo:'1140H505', StationName:'南湖大橋', Address:'台北市南港區' },
-  '1140H506': { StationNo:'1140H506', StationName:'百齡橋',   Address:'台北市中山區' },
-  '1140H507': { StationNo:'1140H507', StationName:'江北橋',   Address:'新北市汐止區' },
-  '1140H508': { StationNo:'1140H508', StationName:'暖江橋',   Address:'基隆市暖暖區' },
-  '1140H509': { StationNo:'1140H509', StationName:'碇內',     Address:'基隆市暖暖區' },
+  '1140H110': { StationNo:'1140H110', StationName:'介壽橋',   Address:'新北市瑞芳區', WarningLevel1:50.3, WarningLevel2:47.3 },
+  '1140H113': { StationNo:'1140H113', StationName:'長安橋',   Address:'新北市汐止區', WarningLevel1:13.5, WarningLevel2:10.5 },
+  '1140H115': { StationNo:'1140H115', StationName:'社后橋',   Address:'新北市汐止區', WarningLevel1:11.5, WarningLevel2:8.5 },
+  '1140H116': { StationNo:'1140H116', StationName:'南湖大橋', Address:'台北市南港區', WarningLevel1:11.6, WarningLevel2:9.8, WarningLevel3:6.4 },
+  '1140H120': { StationNo:'1140H120', StationName:'江北橋',   Address:'新北市汐止區', WarningLevel1:12.7, WarningLevel2:9.7 },
+  '1140H123': { StationNo:'1140H123', StationName:'員山子',   Address:'新北市瑞芳區', WarningLevel1:63.0, WarningLevel2:62.5 },
+  '1140H143': { StationNo:'1140H143', StationName:'百齡橋',   Address:'台北市中山區', WarningLevel1:8.8,  WarningLevel2:7.0 },
+  '1140H163': { StationNo:'1140H163', StationName:'新海大橋', Address:'新北市三重區' },
 };
 
 export default async function handler(req, res) {
